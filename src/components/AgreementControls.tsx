@@ -8,7 +8,7 @@ import { requestSavingsAgreement } from '../integrations/connectors';
 import type { SavingsAccount } from '../lib/types';
 
 /** Leverandører der spareavtaler kan opprettes og endres fra appen */
-export const MANAGED_PROVIDERS = ['Fjelltopp Bank', 'Fjelltopp Liv'];
+export const MANAGED_PROVIDERS = ['Boost Bank', 'Boost'];
 
 const STATUS_LABEL = { aktiv: 'Aktiv', pause: 'På pause', stoppet: 'Stoppet' } as const;
 const STATUS_TONE = { aktiv: 'good', pause: 'warn', stoppet: 'neutral' } as const;
@@ -38,7 +38,7 @@ export function AgreementControls({ acc }: { acc: SavingsAccount }) {
 
   if (!agreement) return null;
 
-  // Spareavtaler kan bare endres fra appen hos Fjelltopp og Fjelltopp Liv
+  // Spareavtaler kan bare endres fra appen hos Boost og Boost
   if (!MANAGED_PROVIDERS.includes(acc.provider)) {
     return (
       <div className="agreement">

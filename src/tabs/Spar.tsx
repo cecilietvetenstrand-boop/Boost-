@@ -104,8 +104,8 @@ function NyttSparing() {
     [state, product, effectiveMonthly, stockShare, fee],
   );
 
-  // Spareavtaler kan bare opprettes hos Fjelltopp (fondskonto og ASK) og Fjelltopp Liv (IPS)
-  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'fjelltopp-liv' : 'bank-fjelltopp'));
+  // Spareavtaler kan bare opprettes hos Boost (fondskonto og ASK) og Boost (IPS)
+  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'boost-liv' : 'bank-boost'));
   const confirm = async () => {
     if (!provider) return;
     setBusy(true);
@@ -176,7 +176,7 @@ function NyttSparing() {
       )}
       <p className="provider-line">
         Spareavtalen opprettes hos <strong>{provider?.name}</strong>
-        {product === 'IPS' ? ' – IPS tilbys gjennom Fjelltopp Liv.' : ' – fond og aksjesparekonto tilbys gjennom Fjelltopp Bank.'}
+        {product === 'IPS' ? ' – IPS tilbys gjennom Boost.' : ' – fond og aksjesparekonto tilbys gjennom Boost Bank.'}
       </p>
 
       <NumberField label="Beløp per måned" value={monthly} onChange={setMonthly} suffix="kr" step={100} min={100} />
@@ -243,7 +243,7 @@ function Aksjeandel() {
         men bare for dem som ble sittende. Har du mer enn 10–15 år igjen, er høy aksjeandel vanligvis et godt valg.
       </Callout>
       {accounts.length === 0 ? (
-        <p className="muted">Du har ingen pensjonskontoer hos Fjelltopp Liv ennå. Aksjeandelen kan bare endres her for kontoer hos Fjelltopp Liv.</p>
+        <p className="muted">Du har ingen pensjonskontoer hos Boost ennå. Aksjeandelen kan bare endres her for kontoer hos Boost.</p>
       ) : (
         <div className="accounts">
           {accounts.map((a) => (
@@ -261,7 +261,7 @@ function Aksjeandel() {
                   <strong>{a.kind} · {a.provider}</strong>
                   <span className="muted">
                     {a.profile === 'livsfase' ? 'Livsfaseprofil' : `${a.stockShare} % aksjer`} · saldo {kr(a.balance)}. Aksjeandelen endres hos {a.provider}, eller ved å flytte
-                    pensjonen til Fjelltopp Liv.
+                    pensjonen til Boost.
                   </span>
                 </div>
               </article>

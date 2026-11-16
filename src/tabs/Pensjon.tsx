@@ -267,7 +267,7 @@ function AddPensionAccount() {
           { value: 'Offentlig TP', label: 'Offentlig tjenestepensjon' },
         ]}
       />
-      <TextField label="Leverandør" value={provider} onChange={setProvider} placeholder="F.eks. Fjelltopp Liv" />
+      <TextField label="Leverandør" value={provider} onChange={setProvider} placeholder="F.eks. Boost" />
       <NumberField label="Saldo / beholdning" value={balance} onChange={setBalance} suffix="kr" step={1000} />
       <label className="toggle">
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />

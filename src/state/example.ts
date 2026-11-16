@@ -26,7 +26,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-epk',
       kind: 'EPK',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       employer: 'Nordlys Teknologi AS',
       balance: 296_000,
       currentJobBalance: 204_000,
@@ -65,10 +65,10 @@ export const exampleState: AppState = {
     },
     {
       id: 'eks-fond',
-      name: 'Fondskonto – Fjelltopp Global Indeks Select',
+      name: 'Fondskonto – Boost Global Indeks',
       type: 'Fond',
-      fund: 'Fjelltopp Global Indeks Select',
-      provider: 'Fjelltopp Bank',
+      fund: 'Boost Global Indeks',
+      provider: 'Boost Bank',
       balance: 72_000,
       monthly: 1_000,
       stockShare: 100,
@@ -81,7 +81,7 @@ export const exampleState: AppState = {
       id: 'eks-vps',
       name: 'VPS-konto – aksjer',
       type: 'VPS',
-      provider: 'Fjelltopp Bank',
+      provider: 'Boost Bank',
       balance: 58_000,
       monthly: 0,
       stockShare: 100,
@@ -93,7 +93,7 @@ export const exampleState: AppState = {
       id: 'eks-ips',
       name: 'IPS',
       type: 'IPS',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       balance: 46_000,
       monthly: 1_000,
       stockShare: 100,
@@ -116,10 +116,10 @@ export const exampleState: AppState = {
     },
   ],
   connections: [],
-  // Uføredekning i pensjonsordningen hos Fjelltopp Liv (vanlig oppsett i privat sektor)
+  // Uføredekning i pensjonsordningen hos Boost (vanlig oppsett i privat sektor)
   disability: {
     enabled: true,
-    provider: 'Fjelltopp Liv',
+    provider: 'Boost',
     percentOfSalary: 3,
     gSupplement: 0.25,
     percentAbove6G: 66,
@@ -131,7 +131,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-gruppeliv',
       type: 'Gruppeliv',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'arbeidsgiver',
       event: 'død',
       amount: 1_301_600,
@@ -141,7 +141,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-yrkesskade',
       type: 'Yrkesskade',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'arbeidsgiver',
       event: 'uførhet',
       note: 'Lovpålagt. Erstatning etter standardregler ved skade i jobb',
@@ -150,7 +150,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-behandling',
       type: 'Behandlingsforsikring',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'arbeidsgiver',
       event: 'behandling',
       note: 'Rask tilgang til spesialist og operasjon',
@@ -159,7 +159,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-barnepensjon',
       type: 'Barnepensjon',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'arbeidsgiver',
       event: 'død',
       yearlyPayout: 65_000,
@@ -169,7 +169,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-liv',
       type: 'Livsforsikring',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'privat',
       event: 'død',
       amount: 1_500_000,
@@ -180,7 +180,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-ufore',
       type: 'Uføreforsikring',
-      provider: 'Fjelltopp Liv',
+      provider: 'Boost',
       source: 'privat',
       event: 'uførhet',
       amount: 750_000,

@@ -49,7 +49,7 @@ src/
 
 ## Viktig
 
-- Alle selskaps- og fondsnavn i appen (Fjelltopp Liv, Fjelltopp Bank, Havbris Pensjon osv.) er **oppdiktede demo-navn**.
+- Alle selskaps- og fondsnavn i appen (Boost, Boost Bank, Havbris Pensjon osv.) er **oppdiktede demo-navn**.
 
 - **Koblingene er i demo-modus** og returnerer testdata. Se [docs/INTEGRASJONER.md](docs/INTEGRASJONER.md) for hva som
   kreves for ekte integrasjoner.

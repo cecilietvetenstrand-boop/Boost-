@@ -83,7 +83,7 @@ const norskPensjon: Connector = {
   async fetch(p) {
     await delay(900);
     const accounts: PensionAccount[] = [
-      { ...demoEpk(p, 'Fjelltopp Liv', 'np-epk-1', true), source: this.id },
+      { ...demoEpk(p, 'Boost', 'np-epk-1', true), source: this.id },
       { ...demoEpk(p, 'Kystlys Livsforsikring', 'np-epk-2', false), source: this.id },
       {
         id: 'np-fripolise-1',
@@ -146,12 +146,12 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
     description:
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
-        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser${id === 'fjelltopp-liv' ? ', og lar deg endre aksjeandel' : ''}.`,
+        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser${id === 'boost-liv' ? ', og lar deg endre aksjeandel' : ''}.`,
     provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
-    // Aksjeandel kan bare endres fra appen hos Fjelltopp Liv
-    canChangeStockShare: id === 'fjelltopp-liv',
-    // Spareavtaler opprettes bare hos Fjelltopp Liv
-    canCreateAgreement: id === 'fjelltopp-liv',
+    // Aksjeandel kan bare endres fra appen hos Boost
+    canChangeStockShare: id === 'boost-liv',
+    // Spareavtaler opprettes bare hos Boost
+    canCreateAgreement: id === 'boost-liv',
     async fetch(p) {
       await delay(800);
       if (kind === 'offentlig') {
@@ -192,11 +192,11 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
     name,
     category: 'bank',
     auth: 'PSD2 (BankID)',
-    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-fjelltopp' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
+    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-boost' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
     provides: products,
     canChangeStockShare: false,
-    // Spareavtaler opprettes bare hos Fjelltopp Bank
-    canCreateAgreement: id === 'bank-fjelltopp',
+    // Spareavtaler opprettes bare hos Boost Bank
+    canCreateAgreement: id === 'bank-boost',
     async fetch(p) {
       await delay(800);
       const rnd = seeded(name + p.salary);
@@ -228,7 +228,7 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
 export const CONNECTORS: Connector[] = [
   norskPensjon,
   nav,
-  provider('fjelltopp-liv', 'Fjelltopp Liv'),
+  provider('boost-liv', 'Boost'),
   provider('havbris', 'Havbris Pensjon'),
   provider('kystlys-liv', 'Kystlys Livsforsikring'),
   provider('trygghavn-pensjon', 'Trygghavn Pensjon'),
@@ -237,7 +237,7 @@ export const CONNECTORS: Connector[] = [
   provider('kommunal-pk', 'Kommunal Pensjonskasse', 'offentlig'),
   provider('statlig-pk', 'Statlig Pensjonskasse', 'offentlig'),
   bank('bank-kystlys', 'Kystlys Bank', ['Sparekonto', 'BSU', 'Fond']),
-  bank('bank-fjelltopp', 'Fjelltopp Bank', ['Sparekonto', 'Fond']),
+  bank('bank-boost', 'Boost Bank', ['Sparekonto', 'Fond']),
   bank('bank-bygdekraft', 'Bygdekraft Sparebank', ['Sparekonto', 'BSU', 'ASK']),
   bank('bank-sundvik', 'Sundvik Bank', ['Sparekonto', 'Fond']),
   bank('bank-torgvik', 'Torgvik Bank', ['Sparekonto', 'Fond']),

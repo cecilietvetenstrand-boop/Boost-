@@ -147,9 +147,9 @@ describe('spareavtaler', () => {
 });
 
 describe('endring av aksjeandel', () => {
-  it('er bare mulig hos Fjelltopp Liv', async () => {
+  it('er bare mulig hos Boost', async () => {
     const { canChangeStockShare } = await import('./calc');
-    expect(canChangeStockShare({ provider: 'Fjelltopp Liv', kind: 'EPK' })).toBe(true);
+    expect(canChangeStockShare({ provider: 'Boost', kind: 'EPK' })).toBe(true);
     expect(canChangeStockShare({ provider: 'Kystlys Livsforsikring', kind: 'PKB' })).toBe(false);
     expect(canChangeStockShare({ provider: 'Havbris Pensjon', kind: 'EPK' })).toBe(false);
   });
