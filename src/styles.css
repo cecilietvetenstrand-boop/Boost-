@@ -377,3 +377,68 @@ input, select { font: inherit; color: inherit; }
 .example-banner { display: flex; flex-wrap: wrap; gap: 8px 16px; align-items: center; justify-content: space-between; background: var(--brand-soft); color: var(--text); border-radius: 18px; padding: 12px 16px; margin-bottom: 16px; font-size: 0.9rem; }
 .example-banner > div:first-child { flex: 1 1 320px; min-width: 0; }
 .example-banner .row { margin: 0; }
+
+/* ---------------- Forside ---------------- */
+button.brand { border: 0; background: none; padding: 0; color: inherit; text-align: left; font: inherit; }
+
+.landing { --ice: #dff4ff; --sky-ink: #ffffff; background: var(--bg); min-height: 100%; }
+.landing-hero { position: relative; overflow: hidden; color: var(--sky-ink); background: #1546ff; isolation: isolate; }
+.fjord { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
+.fjord-glow { animation: glow 9s ease-in-out infinite alternate; transform-origin: 72% 42%; }
+.fjord-ripples line { animation: ripple 6s ease-in-out infinite alternate; }
+.fjord-ripples line:nth-child(2n) { animation-delay: -3s; }
+@keyframes glow { from { opacity: 0.75; transform: scale(1); } to { opacity: 1; transform: scale(1.08); } }
+@keyframes ripple { from { transform: translateX(-18px); } to { transform: translateX(18px); } }
+@media (prefers-reduced-motion: reduce) { .fjord-glow, .fjord-ripples line { animation: none; } }
+
+.landing-inner { max-width: 1120px; margin: 0 auto; padding: 20px max(16px, env(safe-area-inset-right, 0px)) 120px max(16px, env(safe-area-inset-left, 0px)); }
+.landing-top { display: flex; justify-content: space-between; align-items: center; }
+.landing-brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; letter-spacing: -0.01em; }
+.landing-brand .logo { background: #ffffff; color: #1546ff; }
+.landing-link { border: 1px solid rgba(255,255,255,0.45); background: rgba(255,255,255,0.12); color: #fff; border-radius: 999px; padding: 8px 16px; font-weight: 600; backdrop-filter: blur(6px); }
+.landing-link:hover { background: rgba(255,255,255,0.22); }
+
+.landing-grid { display: grid; grid-template-columns: 1.15fr 0.85fr; gap: 40px; align-items: center; margin-top: 72px; }
+.landing-copy { min-width: 0; }
+.landing-eyebrow { text-transform: uppercase; letter-spacing: 0.22em; font-size: 0.78rem; font-weight: 700; color: var(--ice); margin: 0 0 14px; }
+.landing h1 { font-size: clamp(2.3rem, 5.4vw, 4.1rem); line-height: 1.04; letter-spacing: -0.035em; font-weight: 850; margin: 0; text-wrap: balance; text-shadow: 0 2px 30px rgba(6, 20, 110, 0.35); }
+.landing-lead { font-size: 1.12rem; line-height: 1.55; color: var(--ice); max-width: 34em; margin: 20px 0 0; }
+.landing-ctas { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 30px; }
+.landing-cta { display: inline-flex; align-items: center; gap: 8px; border: 0; border-radius: 999px; padding: 14px 24px; background: #ffffff; color: #0d2bd1; font-weight: 750; font-size: 1rem; box-shadow: 0 12px 30px -10px rgba(4, 16, 90, 0.6); transition: transform 0.15s; }
+.landing-cta:hover { transform: translateY(-1px); }
+.landing-cta-ghost { border: 1px solid rgba(255,255,255,0.55); background: transparent; color: #fff; border-radius: 999px; padding: 13px 22px; font-weight: 650; }
+.landing-cta-ghost:hover { background: rgba(255,255,255,0.12); }
+.landing button:focus-visible { outline: 3px solid #8fdcff; outline-offset: 3px; }
+
+.landing-card { background: rgba(255,255,255,0.95); color: #0a1a5c; border-radius: 26px; padding: 22px; box-shadow: 0 30px 60px -24px rgba(4, 16, 90, 0.65); min-width: 0; }
+.landing-card-label { margin: 0; font-size: 0.82rem; font-weight: 600; color: #3856c9; }
+.landing-card-num { margin: 6px 0 0; font-size: 2.4rem; font-weight: 850; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.landing-card-num span { font-size: 1rem; font-weight: 600; color: #5a6aa8; margin-left: 4px; }
+.landing-card-sub { margin: 2px 0 14px; color: #5a6aa8; font-size: 0.9rem; }
+.landing-bar { display: flex; gap: 2px; height: 14px; border-radius: 7px; overflow: hidden; background: #e8eeff; }
+.landing-bar span { display: block; height: 100%; }
+.landing-legend { list-style: none; padding: 0; margin: 14px 0 0; display: grid; gap: 8px; font-size: 0.88rem; }
+.landing-legend li { display: flex; align-items: center; gap: 8px; }
+.landing-legend strong { margin-left: auto; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.landing-card-tip { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 10px 12px; border-radius: 14px; background: #e6f4ff; color: #0d2bd1; font-weight: 600; font-size: 0.88rem; }
+
+.landing-features { position: relative; max-width: 1120px; margin: -72px auto 0; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
+.landing-feature { display: flex; flex-direction: column; gap: 6px; text-align: left; border: 0; background: var(--surface); color: var(--text); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); transition: transform 0.15s, box-shadow 0.15s; }
+.landing-feature:hover { transform: translateY(-2px); box-shadow: var(--shadow-float); }
+.landing-feature strong { font-size: 1rem; margin-top: 6px; }
+.landing-feature .muted { font-size: 0.88rem; line-height: 1.45; }
+.landing-feature-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #2f7bff, #3ec8ff); color: #fff; }
+
+.landing-trust { max-width: 1120px; margin: 28px auto 0; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: flex-start; color: var(--text-muted); font-size: 0.86rem; }
+.landing-trust svg { flex: none; color: var(--brand-bright); margin-top: 2px; }
+.landing-trust p { margin: 0; }
+
+@media (max-width: 900px) {
+  .landing-grid { grid-template-columns: 1fr; margin-top: 44px; gap: 28px; }
+  .landing-features { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .landing-features { grid-template-columns: 1fr; margin-top: -56px; }
+  .landing-inner { padding-bottom: 88px; }
+  .landing-card-num { font-size: 2rem; }
+}

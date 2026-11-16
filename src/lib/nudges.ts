@@ -12,7 +12,7 @@ export interface Nudge {
   action?: { label: string; tab: TabId };
 }
 
-export type TabId = 'oversikt' | 'pensjon' | 'sparing' | 'spar' | 'koblinger' | 'laer' | 'profil';
+export type TabId = 'forside' | 'oversikt' | 'pensjon' | 'sparing' | 'spar' | 'koblinger' | 'laer' | 'profil';
 
 export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
   const p = state.profile;

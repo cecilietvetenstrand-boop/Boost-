@@ -7,6 +7,7 @@ import { Spar } from './tabs/Spar';
 import { Koblinger } from './tabs/Koblinger';
 import { Laer } from './tabs/Laer';
 import { Profil } from './tabs/Profil';
+import { Forside } from './tabs/Forside';
 import type { TabId } from './lib/nudges';
 import { kr } from './lib/format';
 import { BookOpen, ChartLine, LayoutDashboard, Link2, PiggyBank, PlusCircle, UserRound } from 'lucide-react';
@@ -23,8 +24,9 @@ const TABS: { id: TabId; label: string; icon: typeof BookOpen }[] = [
 
 function Shell() {
   const { state, summary, dispatch } = useStore();
-  const initial = (location.hash.slice(1) as TabId) || 'oversikt';
-  const [tab, setTab] = useState<TabId>(TABS.some((t) => t.id === initial) ? initial : 'oversikt');
+  const initial = (location.hash.slice(1) as TabId) || 'forside';
+  const valid = (t: string): t is TabId => t === 'forside' || TABS.some((x) => x.id === t);
+  const [tab, setTab] = useState<TabId>(valid(initial) ? initial : 'forside');
   const go = (t: TabId) => {
     setTab(t);
     history.replaceState(null, '', `#${t}`);
@@ -33,22 +35,24 @@ function Shell() {
   useEffect(() => {
     const onHash = () => {
       const h = location.hash.slice(1) as TabId;
-      if (TABS.some((t) => t.id === h)) setTab(h);
+      if (valid(h)) setTab(h);
     };
     window.addEventListener('hashchange', onHash);
     return () => window.removeEventListener('hashchange', onHash);
   }, []);
 
+  if (tab === 'forside') return <Forside go={go} />;
+
   return (
     <div className="app">
       <header className="topbar">
-        <div className="brand">
+        <button className="brand" onClick={() => go('forside')} aria-label="Til forsiden">
           <span className="logo" aria-hidden>B</span>
           <div>
             <strong>Boost</strong>
             <span className="muted">{state.profile.name ? `Hei, ${state.profile.name}` : 'Din pensjon'}</span>
           </div>
-        </div>
+        </button>
         <div className="topbar-total" title="Forventet pensjon per måned">
           <span className="muted">Pensjon</span>
           <strong>{kr(summary.totalYearly / 12)}/mnd</strong>
