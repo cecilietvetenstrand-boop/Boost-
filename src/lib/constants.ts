@@ -54,4 +54,4 @@ export const LIFECYCLE_START_AGE = 60;
 export const LIFECYCLE_END_AGE = 75;
 export const LIFECYCLE_START_SHARE = 90;
 /** Aksjeandel når nedtrappingen er ferdig ved 75 år */
-export const LIFECYCLE_END_SHARE = 20;
+export const LIFECYCLE_END_SHARE = 15;

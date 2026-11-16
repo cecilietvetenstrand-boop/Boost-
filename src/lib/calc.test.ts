@@ -31,9 +31,9 @@ describe('regler', () => {
   it('livsfaseprofil trapper ned', () => {
     expect(lifecycleShare(40)).toBe(90);
     expect(lifecycleShare(60)).toBe(90);
-    expect(lifecycleShare(67.5)).toBeCloseTo(55);
-    expect(lifecycleShare(75)).toBe(20);
-    expect(lifecycleShare(80)).toBe(20);
+    expect(lifecycleShare(67.5)).toBeCloseTo(52.5);
+    expect(lifecycleShare(75)).toBe(15);
+    expect(lifecycleShare(80)).toBe(15);
   });
 });
 
