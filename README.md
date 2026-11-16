@@ -29,7 +29,7 @@ npm run build    # produksjonsbygg i dist/
 
 Appen publiseres automatisk til GitHub Pages ved hver push (`.github/workflows/deploy.yml`).
 
-1. Gå til **Settings → Pages** i repoet og velg **Source: GitHub Actions** (én gang).
+1. Gå til **Settings → Pages** i repoet, velg **Source: Deploy from a branch**, branch **gh-pages** og mappe **/ (root)**, og trykk **Save** (én gang).
 2. Etter neste push ligger appen på `https://<brukernavn>.github.io/<repo>/`.
 3. Åpne adressen på mobilen og velg **Legg til på Hjem-skjerm** (iPhone/Safari) eller **Installer app** (Android/Chrome).
    Appen får eget ikon, åpnes i fullskjerm og fungerer offline etter første besøk.
