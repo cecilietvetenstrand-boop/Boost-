@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { ArrowRight, ChartLine, Landmark, PiggyBank, ShieldCheck, Sparkles, Wallet } from 'lucide-react';
 import { useStore } from '../state/store';
 import { SOURCE_COLOR } from '../components/charts';
@@ -21,8 +22,9 @@ function Fjord() {
           <stop offset="1" stopColor="#3ea6ff" stopOpacity="0" />
         </radialGradient>
         <linearGradient id="water" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0" stopColor="#2b7bff" />
-          <stop offset="1" stopColor="#071a73" />
+          <stop offset="0" stopColor="#3b8dff" />
+          <stop offset="0.5" stopColor="#0b2ab8" />
+          <stop offset="1" stopColor="#1546ff" />
         </linearGradient>
         <linearGradient id="far" x1="0" y1="0" x2="0" y2="1">
           <stop offset="0" stopColor="#9fd8ff" />
@@ -71,6 +73,11 @@ const FEATURES = [
 export function Forside({ go }: { go: (t: TabId) => void }) {
   const { state, summary: s } = useStore();
   const p = state.profile;
+  // Blå bakgrunn også ved overscroll på mobil
+  useEffect(() => {
+    document.body.classList.add('on-landing');
+    return () => document.body.classList.remove('on-landing');
+  }, []);
   const total = s.totalYearly || 1;
 
   return (

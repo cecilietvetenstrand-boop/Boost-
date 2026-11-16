@@ -24,7 +24,8 @@ const TABS: { id: TabId; label: string; icon: typeof BookOpen }[] = [
 
 function Shell() {
   const { state, summary, dispatch } = useStore();
-  const initial = (location.hash.slice(1) as TabId) || 'forside';
+  // Appen åpner alltid på forsiden; fanene holder adressen oppdatert mens du bruker den
+  const initial: TabId = 'forside';
   const valid = (t: string): t is TabId => t === 'forside' || TABS.some((x) => x.id === t);
   const [tab, setTab] = useState<TabId>(valid(initial) ? initial : 'forside');
   const go = (t: TabId) => {

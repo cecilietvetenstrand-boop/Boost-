@@ -381,7 +381,7 @@ input, select { font: inherit; color: inherit; }
 /* ---------------- Forside ---------------- */
 button.brand { border: 0; background: none; padding: 0; color: inherit; text-align: left; font: inherit; }
 
-.landing { --ice: #dff4ff; --sky-ink: #ffffff; background: var(--bg); min-height: 100%; }
+.landing { --ice: #dff4ff; --sky-ink: #ffffff; min-height: 100vh; color: #fff; background: #1546ff; }
 .landing-hero { position: relative; overflow: hidden; color: var(--sky-ink); background: #1546ff; isolation: isolate; }
 .fjord { position: absolute; inset: 0; width: 100%; height: 100%; z-index: -1; }
 .fjord-glow { animation: glow 9s ease-in-out infinite alternate; transform-origin: 72% 42%; }
@@ -423,14 +423,15 @@ button.brand { border: 0; background: none; padding: 0; color: inherit; text-ali
 .landing-card-tip { display: flex; align-items: center; gap: 8px; margin: 16px 0 0; padding: 10px 12px; border-radius: 14px; background: #e6f4ff; color: #0d2bd1; font-weight: 600; font-size: 0.88rem; }
 
 .landing-features { position: relative; max-width: 1120px; margin: -72px auto 0; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 0 max(16px, env(safe-area-inset-left, 0px)); display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 14px; }
-.landing-feature { display: flex; flex-direction: column; gap: 6px; text-align: left; border: 0; background: var(--surface); color: var(--text); border-radius: 22px; padding: 20px; box-shadow: var(--shadow); transition: transform 0.15s, box-shadow 0.15s; }
-.landing-feature:hover { transform: translateY(-2px); box-shadow: var(--shadow-float); }
+.landing-feature { display: flex; flex-direction: column; gap: 6px; text-align: left; border: 1px solid rgba(255,255,255,0.22); background: rgba(255,255,255,0.12); color: #fff; border-radius: 22px; padding: 20px; box-shadow: 0 20px 40px -24px rgba(2, 10, 60, 0.7); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); transition: transform 0.15s, background 0.15s; }
+.landing-feature:hover { transform: translateY(-2px); background: rgba(255,255,255,0.2); }
+.landing-feature .muted { color: var(--ice); }
 .landing-feature strong { font-size: 1rem; margin-top: 6px; }
 .landing-feature .muted { font-size: 0.88rem; line-height: 1.45; }
-.landing-feature-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: linear-gradient(135deg, #2f7bff, #3ec8ff); color: #fff; }
+.landing-feature-icon { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; background: #ffffff; color: #1546ff; }
 
-.landing-trust { max-width: 1120px; margin: 28px auto 0; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: flex-start; color: var(--text-muted); font-size: 0.86rem; }
-.landing-trust svg { flex: none; color: var(--brand-bright); margin-top: 2px; }
+.landing-trust { max-width: 1120px; margin: 28px auto 0; padding: 0 max(16px, env(safe-area-inset-right, 0px)) 48px max(16px, env(safe-area-inset-left, 0px)); display: flex; gap: 10px; align-items: flex-start; color: var(--ice); font-size: 0.86rem; }
+.landing-trust svg { flex: none; color: #8fdcff; margin-top: 2px; }
 .landing-trust p { margin: 0; }
 
 @media (max-width: 900px) {
@@ -442,3 +443,4 @@ button.brand { border: 0; background: none; padding: 0; color: inherit; text-ali
   .landing-inner { padding-bottom: 88px; }
   .landing-card-num { font-size: 2rem; }
 }
+body.on-landing { background: #1546ff; }
