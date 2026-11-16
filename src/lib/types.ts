@@ -84,11 +84,62 @@ export interface Connection {
   lastSync: string;
 }
 
+export type InsuranceType =
+  | 'Gruppeliv'
+  | 'Yrkesskade'
+  | 'Behandlingsforsikring'
+  | 'Livsforsikring'
+  | 'Uføreforsikring'
+  | 'Kritisk sykdom'
+  | 'Barneforsikring'
+  | 'Ektefellepensjon'
+  | 'Barnepensjon'
+  | 'Annet';
+
+/** Hva forsikringen utløser: dødsfall, uførhet, sykdom eller behandling */
+export type InsuranceEvent = 'død' | 'uførhet' | 'sykdom' | 'behandling' | 'barn';
+
+export interface Insurance {
+  id: string;
+  type: InsuranceType;
+  provider: string;
+  /** Betalt av arbeidsgiver (del av pensjons- og forsikringsordningen) eller privat */
+  source: 'arbeidsgiver' | 'privat';
+  event: InsuranceEvent;
+  /** Forsikringssum i kroner (engangsutbetaling). Tom for f.eks. behandlingsforsikring. */
+  amount?: number;
+  /** Løpende utbetaling per år (f.eks. ektefelle- eller barnepensjon) */
+  yearlyPayout?: number;
+  /** Årlig premie du betaler selv (privat) */
+  yearlyPremium?: number;
+  note?: string;
+  source_id: string; // 'manuell', 'eksempel' eller id til kobling
+}
+
+/** Uføredekning i tjenestepensjonsordningen (uførepensjon + innskuddsfritak) */
+export interface DisabilityCover {
+  enabled: boolean;
+  provider: string;
+  /** Prosent av lønn opp til 12 G */
+  percentOfSalary: number;
+  /** Tillegg i G per år */
+  gSupplement: number;
+  /** Prosent av lønn mellom 6 G og 12 G (det NAV ikke dekker) */
+  percentAbove6G: number;
+  /** Innskuddsfritak: sparingen til alderspensjon fortsetter ved uførhet */
+  premiumWaiver: boolean;
+  /** Barnetillegg i prosent av G per barn */
+  childSupplementG: number;
+  children: number;
+}
+
 export interface AppState {
   profile: Profile;
   pensionAccounts: PensionAccount[];
   savings: SavingsAccount[];
   connections: Connection[];
+  insurances: Insurance[];
+  disability: DisabilityCover;
   /** Satt når appen viser eksempeldata */
   isExample?: boolean;
 }

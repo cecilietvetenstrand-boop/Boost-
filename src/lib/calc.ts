@@ -1,5 +1,5 @@
 import * as C from './constants';
-import type { AppState, InvestmentProfile, PensionAccount, Profile, SavingsAccount } from './types';
+import type { AppState, DisabilityCover, Insurance, InvestmentProfile, PensionAccount, Profile, SavingsAccount } from './types';
 
 // ---------------------------------------------------------------------------
 // Hjelpefunksjoner
@@ -458,4 +458,65 @@ export function summaryByWithdrawalAge(state: AppState) {
     out.push({ age: a, total: s.totalYearly, lifelong: s.lifelongYearly });
   }
   return out;
+}
+
+// ---------------------------------------------------------------------------
+// Uførhet og personforsikring
+// ---------------------------------------------------------------------------
+
+export interface DisabilityResult {
+  nav: number;
+  tjenestepensjon: number;
+  childSupplement: number;
+  total: number;
+  replacementRate: number;
+  gapYearly: number;
+  /** Årlig innskudd til alderspensjon som fortsetter ved innskuddsfritak */
+  premiumWaiverYearly: number;
+  /** Engangsutbetalinger ved uførhet (uføreforsikringer) */
+  lumpSum: number;
+}
+
+/** Anslått inntekt hvis du blir 100 % ufør i dag (forenklet, før skatt) */
+export function calcDisability(p: Profile, d: DisabilityCover, insurances: Insurance[]): DisabilityResult {
+  const nav = C.UFORETRYGD_RATE * Math.min(p.salary, C.UFORETRYGD_CAP_G * C.G);
+  const capped = Math.min(p.salary, C.OTP_SALARY_CAP_G * C.G);
+  const tjenestepensjon = d.enabled
+    ? (d.percentOfSalary / 100) * capped + d.gSupplement * C.G + (d.percentAbove6G / 100) * Math.max(0, capped - C.UFORETRYGD_CAP_G * C.G)
+    : 0;
+  const childSupplement = d.enabled ? d.childSupplementG * C.G * d.children : 0;
+  const total = nav + tjenestepensjon + childSupplement;
+  return {
+    nav,
+    tjenestepensjon,
+    childSupplement,
+    total,
+    replacementRate: p.salary > 0 ? total / p.salary : 0,
+    gapYearly: Math.max(0, p.salary - total),
+    premiumWaiverYearly: d.enabled && d.premiumWaiver ? employerContribution(p) : 0,
+    lumpSum: insurances.filter((i) => i.event === 'uførhet').reduce((s, i) => s + (i.amount ?? 0), 0),
+  };
+}
+
+export interface InsuranceSummary {
+  deathLumpSum: number;
+  deathYearly: number;
+  disabilityLumpSum: number;
+  illnessLumpSum: number;
+  privatePremiumYearly: number;
+  fromEmployer: number;
+  private: number;
+}
+
+export function summarizeInsurances(list: Insurance[]): InsuranceSummary {
+  const sum = (pred: (i: Insurance) => boolean, f: (i: Insurance) => number) => list.filter(pred).reduce((s, i) => s + f(i), 0);
+  return {
+    deathLumpSum: sum((i) => i.event === 'død', (i) => i.amount ?? 0),
+    deathYearly: sum((i) => i.event === 'død', (i) => i.yearlyPayout ?? 0),
+    disabilityLumpSum: sum((i) => i.event === 'uførhet', (i) => i.amount ?? 0),
+    illnessLumpSum: sum((i) => i.event === 'sykdom', (i) => i.amount ?? 0),
+    privatePremiumYearly: sum((i) => i.source === 'privat', (i) => i.yearlyPremium ?? 0),
+    fromEmployer: list.filter((i) => i.source === 'arbeidsgiver').length,
+    private: list.filter((i) => i.source === 'privat').length,
+  };
 }

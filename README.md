@@ -10,6 +10,7 @@ spare for å nå rundt 80 % av lønnen.
 |---|---|
 | **Oversikt** | Forventet pensjon per måned, gapet mot dagens lønn, sparebehov for å nå målet (standard 80 %), personlige forslag (nudging), pensjon ved ulike uttaksaldre og fordeling per kilde |
 | **Pensjonen min** | Folketrygden (beholdning, delingstall, garantipensjon), tjenestepensjon (innskudd/offentlig), EPK og EPK-S (egen pensjonskonto selvvalgt), IPS, AFP privat/offentlig, alle pensjonskontoer og vekstgraf |
+| **Forsikring** | Inntekt hvis du blir ufør (NAV + uførepensjon fra arbeidsgiver, innskuddsfritak, barnetillegg), og personforsikringer fra arbeidsgiver og privat |
 | **Annen sparing** | IPS, ASK, fond, aksjer, sparekonto og BSU – med egen bryter for om hver konto skal tas med i pensjonsberegningen |
 | **Spar** | Opprett spareavtale (IPS/ASK/fond) med forhåndsvisning av effekten, og endre aksjeandel/livsfaseprofil på pensjonskontoene |
 | **Koblinger** | Norsk Pensjon, NAV, pensjonsleverandører (Storebrand, DNB, Gjensidige, SpareBank 1, Nordea, KLP, SPK m.fl.) og banker via PSD2 |

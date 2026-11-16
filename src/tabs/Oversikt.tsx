@@ -3,7 +3,7 @@ import { useStore } from '../state/store';
 import { Callout, Card, Slider, Stat } from '../components/ui';
 import { IncomeComparison, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct } from '../lib/format';
-import { summaryByWithdrawalAge } from '../lib/calc';
+import { calcDisability, summarizeInsurances, summaryByWithdrawalAge } from '../lib/calc';
 import { buildNudges, type TabId } from '../lib/nudges';
 import { MAX_WITHDRAWAL_AGE, MIN_WITHDRAWAL_AGE } from '../lib/constants';
 
@@ -81,6 +81,24 @@ export function Oversikt({ go }: { go: (t: TabId) => void }) {
           </div>
         </Card>
       )}
+
+      <Card
+        title="Er du og familien sikret?"
+        subtitle="Hvis noe skjer før du blir pensjonist"
+        actions={<button className="btn btn-small" onClick={() => go('forsikring')}>Se forsikringer</button>}
+      >
+        {(() => {
+          const u = calcDisability(p, state.disability, state.insurances);
+          const ins = summarizeInsurances(state.insurances);
+          return (
+            <div className="stats">
+              <Stat label="Hvis du blir ufør" value={`${kr(u.total / 12)}/mnd`} hint={`${pct(u.replacementRate)} av lønnen`} tone={u.replacementRate < 0.6 ? 'warn' : undefined} />
+              <Stat label="Til familien ved dødsfall" value={kr(ins.deathLumpSum)} hint={ins.deathYearly > 0 ? `+ ${kr(ins.deathYearly)} i året` : undefined} />
+              <Stat label="Uføredekning i pensjonen" value={state.disability.enabled ? 'Ja' : 'Nei'} hint={state.disability.premiumWaiver && state.disability.enabled ? 'Med innskuddsfritak' : undefined} tone={state.disability.enabled ? 'good' : 'warn'} />
+            </div>
+          );
+        })()}
+      </Card>
 
       <Card title="Når vil du gå av?" subtitle="Jo senere uttak, jo mer får du hvert år">
         <Slider

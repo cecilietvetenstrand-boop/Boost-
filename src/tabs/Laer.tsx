@@ -16,6 +16,8 @@ import {
   Target,
   Users,
   Wallet,
+  ShieldCheck,
+  Umbrella,
 } from 'lucide-react';
 import { Slider } from '../components/ui';
 import { kr } from '../lib/format';
@@ -415,6 +417,48 @@ const ARTICLES: Article[] = [
           'AFP-ordningen i privat sektor er under endring. Sjekk vilkårene hos Fellesordningen for AFP eller tillitsvalgt.',
         ]}
       />
+    ),
+  },
+  {
+    id: 'ufore',
+    icon: ShieldCheck,
+    tag: 'Pensjon',
+    title: 'Uføretrygd og uførepensjon',
+    lead: 'Hva du får hvis du ikke lenger kan jobbe – og hvorfor pensjonsordningen betyr mye.',
+    body: (
+      <>
+        <Dots
+          items={[
+            <><strong>NAV uføretrygd</strong> er 66 % av inntekten din før du ble ufør, men bare opp til 6 G. Tjener du mer, dekker NAV en mindre andel av lønnen.</>,
+            <><strong>Uførepensjon fra arbeidsgiver</strong> er en del av mange pensjonsordninger. Vanlig er noen prosent av lønnen, et tillegg i G og en større andel av lønn mellom 6 og 12 G.</>,
+            <><strong>Innskuddsfritak</strong> betyr at sparingen til alderspensjonen fortsetter selv om du blir ufør. Uten det stopper sparingen.</>,
+            <><strong>Barnetillegg</strong> kan gis for barn under 21 år.</>,
+            <><strong>Uføreforsikring</strong> du kjøper selv gir ofte et engangsbeløp i tillegg.</>,
+          ]}
+        />
+        <Note>Dekningen følger jobben. Bytter du arbeidsgiver, kan vilkårene endre seg – og i overgangen kan du stå uten. Se fanen «Forsikring» for din dekning.</Note>
+      </>
+    ),
+  },
+  {
+    id: 'personforsikring',
+    icon: Umbrella,
+    tag: 'Pensjon',
+    title: 'Personforsikringer – hva har du?',
+    lead: 'Mange har mer forsikring gjennom jobben enn de tror, og noen har mindre.',
+    body: (
+      <>
+        <Dots
+          items={[
+            <><strong>Gruppeliv</strong> gir familien et engangsbeløp hvis du dør, ofte et antall G. Vanligvis betalt av arbeidsgiver.</>,
+            <><strong>Yrkesskadeforsikring</strong> er lovpålagt og dekker skader og sykdom som skyldes jobben.</>,
+            <><strong>Ektefelle- og barnepensjon</strong> kan være en del av pensjonsordningen og gir løpende utbetaling til etterlatte.</>,
+            <><strong>Behandlingsforsikring</strong> gir raskere tilgang til spesialist og operasjon.</>,
+            <><strong>Livsforsikring, uføreforsikring og kritisk sykdom</strong> kjøper du selv for å dekke det jobben ikke dekker, for eksempel boliglånet.</>,
+          ]}
+        />
+        <Note>Samboere er ikke automatisk begunstiget på samme måte som ektefeller. Sjekk begunstigelsen hos forsikringsselskapet.</Note>
+      </>
     ),
   },
   {

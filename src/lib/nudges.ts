@@ -12,7 +12,7 @@ export interface Nudge {
   action?: { label: string; tab: TabId };
 }
 
-export type TabId = 'forside' | 'oversikt' | 'pensjon' | 'sparing' | 'spar' | 'koblinger' | 'laer' | 'profil';
+export type TabId = 'forside' | 'oversikt' | 'forsikring' | 'pensjon' | 'sparing' | 'spar' | 'koblinger' | 'laer' | 'profil';
 
 export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
   const p = state.profile;
@@ -101,6 +101,16 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
       tone: 'good',
       title: 'Du er på god vei!',
       text: `Med dagens sparing ser det ut til at du når målet om ${p.targetPercent} % av lønnen. Husk å sjekke igjen hvert år.`,
+    });
+  }
+
+  if (!state.disability.enabled && p.tjenestepensjon !== 'ingen') {
+    out.push({
+      id: 'ufore',
+      tone: 'warn',
+      title: 'Sjekk uføredekningen din',
+      text: 'Du har ikke registrert uførepensjon i pensjonsordningen. Uten den får du bare NAVs uføretrygd, som er 66 % av lønn opp til 6 G.',
+      action: { label: 'Se forsikring', tab: 'forsikring' },
     });
   }
 

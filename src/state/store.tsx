@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNode } from 'react';
-import type { AppState, PensionAccount, Profile, SavingsAccount } from '../lib/types';
+import type { AppState, DisabilityCover, Insurance, PensionAccount, Profile, SavingsAccount } from '../lib/types';
 import type { ImportResult } from '../integrations/connectors';
 import { calcSummary, type PensionSummary } from '../lib/calc';
 import { exampleState } from './example';
@@ -24,6 +24,17 @@ export const defaultState: AppState = {
   pensionAccounts: [],
   savings: [],
   connections: [],
+  insurances: [],
+  disability: {
+    enabled: true,
+    provider: '',
+    percentOfSalary: 3,
+    gSupplement: 0.25,
+    percentAbove6G: 66,
+    premiumWaiver: true,
+    childSupplementG: 0,
+    children: 0,
+  },
 };
 
 type Action =
@@ -34,6 +45,9 @@ type Action =
   | { type: 'removeSavings'; id: string }
   | { type: 'import'; connectorId: string; result: ImportResult }
   | { type: 'disconnect'; connectorId: string }
+  | { type: 'upsertInsurance'; insurance: Insurance }
+  | { type: 'removeInsurance'; id: string }
+  | { type: 'disability'; patch: Partial<DisabilityCover> }
   | { type: 'reset' }
   | { type: 'loadExample' };
 
@@ -103,6 +117,11 @@ function reducer(state: AppState, action: Action): AppState {
         pensionAccounts,
         savings,
         connections,
+        insurances: [
+          ...state.insurances.filter((i) => !(result.insurances ?? []).some((n) => n.id === i.id)),
+          ...(result.insurances ?? []),
+        ],
+        disability: result.disability ? { ...state.disability, ...result.disability } : state.disability,
         profile:
           result.folketrygdBeholdning != null
             ? { ...state.profile, folketrygdBeholdning: result.folketrygdBeholdning }
@@ -115,7 +134,21 @@ function reducer(state: AppState, action: Action): AppState {
         connections: state.connections.filter((c) => c.connectorId !== action.connectorId),
         pensionAccounts: state.pensionAccounts.filter((a) => a.source !== action.connectorId),
         savings: state.savings.filter((s) => s.source !== action.connectorId),
+        insurances: state.insurances.filter((i) => i.source_id !== action.connectorId),
       };
+    case 'upsertInsurance': {
+      const exists = state.insurances.some((i) => i.id === action.insurance.id);
+      return {
+        ...state,
+        insurances: exists
+          ? state.insurances.map((i) => (i.id === action.insurance.id ? action.insurance : i))
+          : [...state.insurances, action.insurance],
+      };
+    }
+    case 'removeInsurance':
+      return { ...state, insurances: state.insurances.filter((i) => i.id !== action.id) };
+    case 'disability':
+      return { ...state, disability: { ...state.disability, ...action.patch } };
     case 'reset':
       return defaultState;
     case 'loadExample':
@@ -128,7 +161,13 @@ function load(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return exampleState;
     const parsed = JSON.parse(raw) as AppState;
-    return { ...defaultState, ...parsed, profile: { ...defaultState.profile, ...parsed.profile } };
+    return {
+      ...defaultState,
+      ...parsed,
+      profile: { ...defaultState.profile, ...parsed.profile },
+      insurances: parsed.insurances ?? exampleState.insurances,
+      disability: { ...defaultState.disability, ...(parsed.disability ?? exampleState.disability) },
+    };
   } catch {
     return exampleState;
   }

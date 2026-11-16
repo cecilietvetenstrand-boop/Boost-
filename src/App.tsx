@@ -8,15 +8,17 @@ import { Koblinger } from './tabs/Koblinger';
 import { Laer } from './tabs/Laer';
 import { Profil } from './tabs/Profil';
 import { Forside } from './tabs/Forside';
+import { Forsikring } from './tabs/Forsikring';
 import type { TabId } from './lib/nudges';
 import { kr } from './lib/format';
-import { BookOpen, ChartLine, LayoutDashboard, Link2, PiggyBank, PlusCircle, UserRound } from 'lucide-react';
+import { BookOpen, ChartLine, LayoutDashboard, Link2, PiggyBank, PlusCircle, ShieldCheck, UserRound } from 'lucide-react';
 
 const TABS: { id: TabId; label: string; icon: typeof BookOpen }[] = [
   { id: 'oversikt', label: 'Oversikt', icon: LayoutDashboard },
   { id: 'pensjon', label: 'Pensjon', icon: ChartLine },
   { id: 'sparing', label: 'Sparing', icon: PiggyBank },
   { id: 'spar', label: 'Spar', icon: PlusCircle },
+  { id: 'forsikring', label: 'Forsikring', icon: ShieldCheck },
   { id: 'koblinger', label: 'Koblinger', icon: Link2 },
   { id: 'laer', label: 'Lær', icon: BookOpen },
   { id: 'profil', label: 'Profil', icon: UserRound },
@@ -90,6 +92,7 @@ function Shell() {
         {tab === 'pensjon' && <Pensjon go={go} />}
         {tab === 'sparing' && <AnnenSparing go={go} />}
         {tab === 'spar' && <Spar />}
+        {tab === 'forsikring' && <Forsikring go={go} />}
         {tab === 'koblinger' && <Koblinger />}
         {tab === 'laer' && <Laer go={go} />}
         {tab === 'profil' && <Profil />}

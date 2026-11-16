@@ -32,6 +32,10 @@ export const AFP_LAST_ACCRUAL_AGE = 61;
 export const OFFENTLIG_TP_RATE = 0.057;
 export const OFFENTLIG_TP_EXTRA_RATE = 0.181;
 
+/** NAV uføretrygd: 66 % av beregningsgrunnlaget opp til 6 G */
+export const UFORETRYGD_RATE = 0.66;
+export const UFORETRYGD_CAP_G = 6;
+
 /** Uttak */
 export const MIN_WITHDRAWAL_AGE = 62;
 export const MAX_WITHDRAWAL_AGE = 75;

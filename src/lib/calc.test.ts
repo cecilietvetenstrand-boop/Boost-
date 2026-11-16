@@ -119,3 +119,16 @@ describe('eksempeldata', () => {
     expect(all.totalYearly).toBeGreaterThan(s.totalYearly);
   });
 });
+
+describe('uførhet', () => {
+  it('NAV dekker 66 % opp til 6 G, uførepensjonen resten', async () => {
+    const { calcDisability } = await import('./calc');
+    const d = { ...defaultState.disability, percentOfSalary: 3, gSupplement: 0.25, percentAbove6G: 66, children: 0 };
+    const low = calcDisability({ ...profile, salary: 500_000 }, d, []);
+    expect(low.nav).toBeCloseTo(0.66 * 500_000);
+    const high = calcDisability({ ...profile, salary: 10 * G }, d, []);
+    expect(high.nav).toBeCloseTo(0.66 * 6 * G);
+    expect(high.tjenestepensjon).toBeCloseTo(0.03 * 10 * G + 0.25 * G + 0.66 * 4 * G);
+    expect(calcDisability(profile, { ...d, enabled: false }, []).tjenestepensjon).toBe(0);
+  });
+});

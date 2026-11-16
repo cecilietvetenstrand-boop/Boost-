@@ -5,7 +5,7 @@
 // `fetch`, `updateStockShare` og `createSavingsAgreement` ut med ekte API-kall – se
 // docs/INTEGRASJONER.md for hva som kreves for hver kilde (avtaler, autentisering, lisenser).
 
-import type { PensionAccount, Profile, SavingsAccount } from '../lib/types';
+import type { DisabilityCover, Insurance, PensionAccount, Profile, SavingsAccount } from '../lib/types';
 import { G } from '../lib/constants';
 
 export type ConnectorCategory = 'samlet' | 'offentlig' | 'leverandor' | 'bank';
@@ -14,6 +14,8 @@ export interface ImportResult {
   pensionAccounts?: PensionAccount[];
   savings?: SavingsAccount[];
   folketrygdBeholdning?: number;
+  insurances?: Insurance[];
+  disability?: Partial<DisabilityCover>;
 }
 
 export interface Connector {
@@ -145,7 +147,7 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
         : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser, og lar deg endre aksjeandel.`,
-    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Investeringsprofil'],
+    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
     canChangeStockShare: kind === 'privat',
     canCreateAgreement: kind === 'privat',
     async fetch(p) {
@@ -169,7 +171,15 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
           ],
         };
       }
-      return { pensionAccounts: [{ ...demoEpk(p, name, `${id}-epk`, true), source: id }] };
+      return {
+        pensionAccounts: [{ ...demoEpk(p, name, `${id}-epk`, true), source: id }],
+        // Forsikringer knyttet til pensjonsordningen hos arbeidsgiver
+        insurances: [
+          { id: `${id}-gruppeliv`, type: 'Gruppeliv', provider: name, source: 'arbeidsgiver', event: 'død', amount: 10 * G, note: '10 G ved dødsfall', source_id: id },
+          { id: `${id}-yrkesskade`, type: 'Yrkesskade', provider: name, source: 'arbeidsgiver', event: 'uførhet', note: 'Lovpålagt. Erstatning etter standardregler ved yrkesskade', source_id: id },
+        ],
+        disability: { enabled: true, provider: name, percentOfSalary: 3, gSupplement: 0.25, percentAbove6G: 66, premiumWaiver: true },
+      };
     },
   };
 }
