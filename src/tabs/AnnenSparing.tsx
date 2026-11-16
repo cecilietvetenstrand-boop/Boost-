@@ -3,6 +3,7 @@ import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Stat, TextField, Toggle } from '../components/ui';
 import { kr, uid } from '../lib/format';
 import { projectSavings } from '../lib/calc';
+import { AgreementControls } from '../components/AgreementControls';
 import type { SavingsAccount, SavingsType } from '../lib/types';
 import type { TabId } from '../lib/nudges';
 
@@ -63,7 +64,7 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
                   </p>
                 </div>
                 <div className="row">
-                  {acc.agreement && <Badge tone="info">Spareavtale {acc.agreement.status}</Badge>}
+                  {acc.fund && <Badge tone="info">{acc.fund}</Badge>}
                   {acc.source === 'eksempel' ? <Badge>Eksempel</Badge> : acc.source !== 'manuell' && acc.source !== 'app' && <Badge>Koblet</Badge>}
                 </div>
               </div>
@@ -90,17 +91,8 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
                   {kr(proj.balanceAtWithdrawal)} ved {p.withdrawalAge} år ≈ {kr(proj.yearlyPayout / 12)}/mnd
                 </span>
               </div>
+              <AgreementControls acc={acc} />
               <div className="row">
-                {acc.agreement && (
-                  <button
-                    className="btn btn-ghost btn-small"
-                    onClick={() =>
-                      update({ ...acc, agreement: { ...acc.agreement!, status: acc.agreement!.status === 'aktiv' ? 'pause' : 'aktiv' } })
-                    }
-                  >
-                    {acc.agreement.status === 'aktiv' ? 'Sett avtalen på pause' : 'Gjenoppta avtalen'}
-                  </button>
-                )}
                 {(acc.source === 'manuell' || acc.source === 'app' || acc.source === 'eksempel') && (
                   <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: 'removeSavings', id: acc.id })}>Slett</button>
                 )}

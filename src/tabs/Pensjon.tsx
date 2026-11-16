@@ -3,7 +3,7 @@ import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, TextField } from '../components/ui';
 import { GrowthChart, SOURCE_COLOR, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, feeSplit, isEpk, summaryByWithdrawalAge } from '../lib/calc';
+import { activeMonthly, calcSummary, feeSplit, isEpk, summaryByWithdrawalAge } from '../lib/calc';
 import { G, IPS_MAX_YEARLY, MAX_WITHDRAWAL_AGE, TAX_RATE_ORDINARY_INCOME, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
 import type { PensionAccount, PensionKind } from '../lib/types';
 import type { TabId } from '../lib/nudges';
@@ -420,7 +420,7 @@ function PensionAccountCard({ account: a, go }: { account: PensionAccount; go: (
 function IpsCard({ go }: { go: (t: TabId) => void }) {
   const { state, summary: s } = useStore();
   const ips = state.savings.filter((x) => x.type === 'IPS');
-  const yearly = ips.reduce((a, x) => a + (x.agreement?.status === 'pause' ? 0 : x.monthly) * 12, 0);
+  const yearly = ips.reduce((a, x) => a + activeMonthly(x) * 12, 0);
   const balance = ips.reduce((a, x) => a + x.balance, 0);
   const fromIps = s.savings.filter((x) => x.kind === 'IPS').reduce((a, x) => a + x.yearlyPayout, 0);
   const room = Math.max(0, IPS_MAX_YEARLY - yearly);

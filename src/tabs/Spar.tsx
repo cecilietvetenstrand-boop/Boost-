@@ -2,24 +2,65 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, Toggle } from '../components/ui';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
+import { activeMonthly, calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
+import { AgreementControls } from '../components/AgreementControls';
 import { LIFECYCLE_END_AGE, LIFECYCLE_END_SHARE, LIFECYCLE_START_AGE, LIFECYCLE_START_SHARE } from '../lib/constants';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from '../lib/constants';
 import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/types';
 
 const PRODUCTS: { value: SavingsType; label: string; info: string }[] = [
-  { value: 'IPS', label: 'IPS – pensjonssparing med skattefradrag', info: `Maks ${kr(IPS_MAX_YEARLY)} i året. 22 % skattefradrag. Bundet til 62 år.` },
-  { value: 'ASK', label: 'Aksjesparekonto (ASK)', info: 'Fleksibelt – du kan ta ut pengene når du vil. Skatt først når gevinsten tas ut.' },
-  { value: 'Fond', label: 'Fondskonto', info: 'Spar i fond, f.eks. globale indeksfond med lave kostnader.' },
+  { value: 'Fond', label: 'Fondskonto', info: 'Spar fast i ett eller flere fond. Du kan ta ut pengene når du vil.' },
+  { value: 'IPS', label: 'IPS', info: `Pensjonssparing med 22 % skattefradrag. Maks ${kr(IPS_MAX_YEARLY)} i året, bundet til 62 år.` },
+  { value: 'ASK', label: 'Aksjesparekonto', info: 'Fond og aksjer uten skatt underveis. Skatt først når gevinsten tas ut.' },
+];
+
+/** Eksempelfond (generiske navn) med aksjeandel og årlig kostnad */
+const FUNDS = [
+  { name: 'Globalt indeksfond', stockShare: 100, fee: 0.2, info: 'Tusenvis av selskaper over hele verden' },
+  { name: 'Bærekraftig globalt aksjefond', stockShare: 100, fee: 0.6, info: 'Globale aksjer med bærekraftskriterier' },
+  { name: 'Norsk aksjefond', stockShare: 100, fee: 0.8, info: 'Selskaper på Oslo Børs' },
+  { name: 'Kombinasjonsfond 50/50', stockShare: 50, fee: 0.5, info: 'Halvparten aksjer, halvparten renter' },
+  { name: 'Rentefond', stockShare: 0, fee: 0.2, info: 'Lav risiko, lavere forventet avkastning' },
 ];
 
 export function Spar() {
   return (
     <div className="stack">
+      <DineAvtaler />
       <NyttSparing />
       <Aksjeandel />
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Dine spareavtaler: øk, endre, pause eller stopp
+// ---------------------------------------------------------------------------
+
+function DineAvtaler() {
+  const { state } = useStore();
+  const list = state.savings.filter((x) => x.agreement);
+  if (!list.length) return null;
+  const total = list.reduce((a, x) => a + activeMonthly(x), 0);
+  return (
+    <Card title="Dine spareavtaler" subtitle={`Du sparer ${kr(total)} i måneden`}>
+      <div className="accounts">
+        {list.map((acc) => (
+          <article key={acc.id} className="account">
+            <div className="account-head">
+              <div>
+                <h3>{acc.name}</h3>
+                <p className="muted">
+                  {acc.provider} · {acc.fund ?? `${acc.stockShare} % aksjer`} · saldo {kr(acc.balance)}
+                </p>
+              </div>
+            </div>
+            <AgreementControls acc={acc} />
+          </article>
+        ))}
+      </div>
+    </Card>
   );
 }
 
@@ -39,10 +80,15 @@ function NyttSparing() {
     );
   }, [state.connections]);
 
-  const [product, setProduct] = useState<SavingsType>('IPS');
+  const [product, setProduct] = useState<SavingsType>('Fond');
+  const [fundName, setFundName] = useState(FUNDS[0].name);
   const [providerId, setProviderId] = useState(banks[0]?.id ?? '');
   const [monthly, setMonthly] = useState(needed > 0 ? Math.min(needed, 1250) : 1000);
-  const [stockShare, setStockShare] = useState(s.yearsToWithdrawal > 10 ? 100 : 50);
+  const [ipsShare, setIpsShare] = useState(s.yearsToWithdrawal > 10 ? 100 : 50);
+  const fund = FUNDS.find((f) => f.name === fundName) ?? FUNDS[0];
+  const usesFund = product !== 'IPS';
+  const stockShare = usesFund ? fund.stockShare : ipsShare;
+  const fee = usesFund ? fund.fee : 0.3;
   const [day, setDay] = useState(25);
   const [include, setInclude] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -65,13 +111,13 @@ function NyttSparing() {
             balance: 0,
             monthly: effectiveMonthly,
             stockShare,
-            fee: 0.3,
+            fee,
             includeInPension: true,
             source: 'app',
           },
         ],
       }),
-    [state, product, effectiveMonthly, stockShare],
+    [state, product, effectiveMonthly, stockShare, fee],
   );
 
   const provider = banks.find((b) => b.id === providerId);
@@ -83,13 +129,14 @@ function NyttSparing() {
       type: 'upsertSavings',
       account: {
         id: uid(),
-        name: `${product === 'IPS' ? 'IPS' : product === 'ASK' ? 'Aksjesparekonto' : 'Fondssparing'} – ${provider.name}`,
+        name: product === 'IPS' ? `IPS – ${provider.name}` : `${product === 'ASK' ? 'Aksjesparekonto' : 'Fondskonto'} – ${fund.name}`,
         type: product,
         provider: provider.name,
         balance: 0,
         monthly: effectiveMonthly,
         stockShare,
-        fee: 0.3,
+        fee,
+        fund: usesFund ? fund.name : undefined,
         includeInPension: include,
         agreement: { startDate: new Date().toISOString(), dayOfMonth: day, status: 'aktiv' },
         source: 'app',
@@ -103,12 +150,37 @@ function NyttSparing() {
     <Card title="Start egen sparing" subtitle="Opprett en fast spareavtale – det enkleste grepet for mer pensjon">
       {done && (
         <Callout tone="good">
-          Spareavtalen er opprettet (ref. {done}). Du finner den under «Annen sparing».{' '}
+          Spareavtalen er opprettet (ref. {done}). Du finner den under «Dine spareavtaler» øverst på siden.{' '}
           <button className="link" onClick={() => setDone(null)}>Lag en til</button>
         </Callout>
       )}
+      <span className="field-label">Hva vil du spare i?</span>
+      <div className="product-cards" role="radiogroup" aria-label="Spareprodukt">
+        {PRODUCTS.map((x) => (
+          <button key={x.value} role="radio" aria-checked={product === x.value} className={`product-card ${product === x.value ? 'on' : ''}`} onClick={() => setProduct(x.value)}>
+            <strong>{x.label}</strong>
+            <span className="muted">{x.info}</span>
+          </button>
+        ))}
+      </div>
+      {usesFund && (
+        <>
+          <span className="field-label">Velg fond</span>
+          <div className="fund-list" role="radiogroup" aria-label="Fond">
+            {FUNDS.map((f) => (
+              <button key={f.name} role="radio" aria-checked={fundName === f.name} className={`fund ${fundName === f.name ? 'on' : ''}`} onClick={() => setFundName(f.name)}>
+                <span>
+                  <strong>{f.name}</strong>
+                  <br />
+                  <span className="muted">{f.info}</span>
+                </span>
+                <span className="muted">{f.stockShare} % aksjer · {f.fee.toLocaleString('nb-NO')} % kostnad</span>
+              </button>
+            ))}
+          </div>
+        </>
+      )}
       <div className="grid2">
-        <Select label="Hva vil du spare i?" value={product} onChange={setProduct} options={PRODUCTS} help={PRODUCTS.find((x) => x.value === product)?.info} />
         <Select
           label="Hos hvem?"
           value={providerId}
@@ -139,7 +211,7 @@ function NyttSparing() {
         </Callout>
       )}
 
-      <Slider label="Aksjeandel" value={stockShare} min={0} max={100} step={10} onChange={setStockShare} format={(v) => `${v} %`} />
+      {!usesFund && <Slider label="Aksjeandel i IPS" value={ipsShare} min={0} max={100} step={10} onChange={setIpsShare} format={(v) => `${v} %`} />}
       <div className="grid2">
         <NumberField label="Trekkdato (dag i måneden)" value={day} min={1} max={28} onChange={(v) => setDay(Math.max(1, Math.min(28, v)))} />
         <div className="field">

@@ -282,9 +282,14 @@ export function savingsPayoutYears(type: string, withdrawalAge: number) {
   return type === 'IPS' ? payoutYears(withdrawalAge) : Math.max(1, C.FREE_SAVINGS_END_AGE - withdrawalAge);
 }
 
+/** Månedlig sparing som faktisk trekkes (0 hvis avtalen er satt på pause eller stoppet) */
+export function activeMonthly(s: SavingsAccount): number {
+  return s.agreement && s.agreement.status !== 'aktiv' ? 0 : s.monthly;
+}
+
 export function projectSavings(p: Profile, s: SavingsAccount): AccountProjection {
   const age = ageOf(p);
-  const monthly = s.agreement?.status === 'pause' ? 0 : s.monthly;
+  const monthly = activeMonthly(s);
   const proj = projectBalance({
     balance: s.balance,
     yearlyContribution: monthly * 12,

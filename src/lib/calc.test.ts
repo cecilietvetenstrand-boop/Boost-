@@ -134,3 +134,14 @@ describe('uførhet', () => {
     expect(calcDisability(profile, { ...d, enabled: false }, []).tjenestepensjon).toBe(0);
   });
 });
+
+describe('spareavtaler', () => {
+  it('pause og stopp gir ingen nye innskudd', async () => {
+    const { activeMonthly } = await import('./calc');
+    const base = { id: 'f', name: 'Fond', type: 'Fond' as const, provider: 'x', balance: 0, monthly: 1000, stockShare: 100, fee: 0.2, includeInPension: true, source: 'app' };
+    const ag = { startDate: '2026-01-01', dayOfMonth: 25 };
+    expect(activeMonthly({ ...base, agreement: { ...ag, status: 'aktiv' } })).toBe(1000);
+    expect(activeMonthly({ ...base, agreement: { ...ag, status: 'pause' } })).toBe(0);
+    expect(activeMonthly({ ...base, agreement: { ...ag, status: 'stoppet' } })).toBe(0);
+  });
+});

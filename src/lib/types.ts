@@ -73,8 +73,10 @@ export interface SavingsAccount {
   agreement?: {
     startDate: string;
     dayOfMonth: number;
-    status: 'aktiv' | 'pause';
+    status: 'aktiv' | 'pause' | 'stoppet';
   };
+  /** Valgt fond for fondskonto/ASK */
+  fund?: string;
   source: string;
 }
 

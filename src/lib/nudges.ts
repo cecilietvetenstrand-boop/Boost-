@@ -1,6 +1,6 @@
 // Personlige "dytt" (nudges): små, konkrete forslag basert på brukerens egne tall.
 import type { AppState } from './types';
-import { calcSummary, type PensionSummary } from './calc';
+import { activeMonthly, calcSummary, type PensionSummary } from './calc';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from './constants';
 import { kr } from './format';
 
@@ -28,7 +28,7 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
     });
   }
 
-  const ipsYearly = state.savings.filter((x) => x.type === 'IPS').reduce((a, x) => a + x.monthly * 12, 0);
+  const ipsYearly = state.savings.filter((x) => x.type === 'IPS').reduce((a, x) => a + activeMonthly(x) * 12, 0);
   if (ipsYearly < IPS_MAX_YEARLY) {
     const extra = IPS_MAX_YEARLY - ipsYearly;
     const better = calcSummary({

@@ -65,8 +65,9 @@ export const exampleState: AppState = {
     },
     {
       id: 'eks-fond',
-      name: 'Fondskonto – globalt indeksfond',
+      name: 'Fondskonto – Globalt indeksfond',
       type: 'Fond',
+      fund: 'Globalt indeksfond',
       provider: 'DNB',
       balance: 72_000,
       monthly: 1_000,
