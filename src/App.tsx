@@ -9,15 +9,16 @@ import { Laer } from './tabs/Laer';
 import { Profil } from './tabs/Profil';
 import type { TabId } from './lib/nudges';
 import { kr } from './lib/format';
+import { BookOpen, ChartLine, LayoutDashboard, Link2, PiggyBank, PlusCircle, UserRound } from 'lucide-react';
 
-const TABS: { id: TabId; label: string; icon: string }[] = [
-  { id: 'oversikt', label: 'Oversikt', icon: '◎' },
-  { id: 'pensjon', label: 'Pensjonen min', icon: '▤' },
-  { id: 'sparing', label: 'Annen sparing', icon: '◈' },
-  { id: 'spar', label: 'Spar', icon: '＋' },
-  { id: 'koblinger', label: 'Koblinger', icon: '⇄' },
-  { id: 'laer', label: 'Lær mer', icon: '✎' },
-  { id: 'profil', label: 'Profil', icon: '☺' },
+const TABS: { id: TabId; label: string; icon: typeof BookOpen }[] = [
+  { id: 'oversikt', label: 'Oversikt', icon: LayoutDashboard },
+  { id: 'pensjon', label: 'Pensjon', icon: ChartLine },
+  { id: 'sparing', label: 'Sparing', icon: PiggyBank },
+  { id: 'spar', label: 'Spar', icon: PlusCircle },
+  { id: 'koblinger', label: 'Koblinger', icon: Link2 },
+  { id: 'laer', label: 'Lær', icon: BookOpen },
+  { id: 'profil', label: 'Profil', icon: UserRound },
 ];
 
 function Shell() {
@@ -56,7 +57,7 @@ function Shell() {
       <nav className="tabs" aria-label="Faner">
         {TABS.map((t) => (
           <button key={t.id} className={tab === t.id ? 'active' : ''} aria-current={tab === t.id ? 'page' : undefined} onClick={() => go(t.id)}>
-            <span className="tab-icon" aria-hidden>{t.icon}</span>
+            <t.icon className="tab-icon" size={18} aria-hidden />
             <span>{t.label}</span>
           </button>
         ))}
@@ -67,7 +68,7 @@ function Shell() {
         {tab === 'sparing' && <AnnenSparing go={go} />}
         {tab === 'spar' && <Spar />}
         {tab === 'koblinger' && <Koblinger />}
-        {tab === 'laer' && <Laer />}
+        {tab === 'laer' && <Laer go={go} />}
         {tab === 'profil' && <Profil />}
       </main>
     </div>

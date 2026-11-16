@@ -18,7 +18,7 @@ export const SOURCE_COLOR: Record<string, string> = {
   afp: 'var(--series-2)',
   offentligTp: 'var(--series-3)',
   epk: 'var(--series-4)',
-  epks: 'var(--series-5)',
+  egen: 'var(--series-5)',
   savings: 'var(--series-6)',
 };
 
@@ -92,19 +92,24 @@ function ChartTooltip({ active, payload, label, labelPrefix = 'Alder' }: any) {
 }
 
 /** Pensjon per år for ulike uttaksaldre */
-export function WithdrawalAgeChart({ data, selected, salary }: {
+export function WithdrawalAgeChart({ data, selected, salary, onSelect }: {
   data: { age: number; total: number; lifelong: number }[];
   selected: number;
   salary: number;
+  onSelect?: (age: number) => void;
 }) {
+  const click = (d: any) => {
+    const age = d?.payload?.age ?? d?.activeLabel;
+    if (onSelect && age != null) onSelect(Number(age));
+  };
   const rows = data.map((d) => ({ age: d.age, total: d.total / 12, lifelong: d.lifelong / 12 }));
   return (
     <div className="chart" role="img" aria-label="Månedlig pensjon for ulike uttaksaldre">
       <ResponsiveContainer width="100%" height={240}>
-        <BarChart data={rows} barGap={2} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+        <BarChart data={rows} barGap={2} margin={{ top: 8, right: 8, left: 0, bottom: 0 }} onClick={click} style={{ cursor: onSelect ? 'pointer' : undefined }}>
           <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="age" tick={axis} tickLine={false} axisLine={{ stroke: 'var(--grid)' }} />
-          <YAxis tick={axis} tickFormatter={krShort} tickLine={false} axisLine={false} width={48} />
+          <YAxis tick={axis} tickFormatter={krShort} tickLine={false} axisLine={false} width={60} />
           <Tooltip content={<ChartTooltip labelPrefix="Uttak ved" />} cursor={{ fill: 'var(--hover)' }} />
           <ReferenceLine y={salary / 12} stroke="var(--text-muted)" strokeDasharray="4 4" label={{ value: 'Lønn i dag', fill: 'var(--text-secondary)', fontSize: 12, position: 'insideTopRight' }} />
           <Bar dataKey="total" name="Pensjon de første årene" fill="var(--series-1)" radius={[4, 4, 0, 0]} maxBarSize={22}
@@ -136,7 +141,7 @@ export function GrowthChart({ series }: { series: { key: string; name: string; c
         <LineChart data={rows} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--grid)" />
           <XAxis dataKey="age" tick={axis} tickLine={false} axisLine={{ stroke: 'var(--grid)' }} />
-          <YAxis tick={axis} tickFormatter={krShort} tickLine={false} axisLine={false} width={48} />
+          <YAxis tick={axis} tickFormatter={krShort} tickLine={false} axisLine={false} width={60} />
           <Tooltip content={<ChartTooltip />} cursor={{ stroke: 'var(--text-muted)', strokeDasharray: '3 3' }} />
           {series.map((s) => (
             <Line key={s.key} type="monotone" dataKey={s.key} name={s.name} stroke={s.color} strokeWidth={2} dot={false} activeDot={{ r: 4 }} />

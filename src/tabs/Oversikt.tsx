@@ -18,6 +18,10 @@ export function Oversikt({ go }: { go: (t: TabId) => void }) {
 
   return (
     <div className="stack">
+      <header className="page-head">
+        <h1>{p.name ? `Hei, ${p.name}` : 'Din økonomi'}</h1>
+        <p>Pensjon fra NAV og arbeidsgiver, sammen med all egen sparing.</p>
+      </header>
       <section className="hero">
         <div className="hero-main">
           <p className="hero-kicker">Forventet pensjon fra {p.withdrawalAge} år</p>

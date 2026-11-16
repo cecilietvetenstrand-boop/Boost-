@@ -1,358 +1,445 @@
-import { useState, type ReactNode } from 'react';
+import { useState, type ComponentType, type ReactNode } from 'react';
+import {
+  Anchor,
+  ArrowRight,
+  Brain,
+  Briefcase,
+  ChartPie,
+  Gauge,
+  HandCoins,
+  Landmark,
+  ListChecks,
+  PiggyBank,
+  Receipt,
+  Repeat,
+  Scale,
+  Sprout,
+  Target,
+  Users,
+  Wallet,
+} from 'lucide-react';
+import { Slider } from '../components/ui';
+import { kr } from '../lib/format';
+import type { TabId } from '../lib/nudges';
+
+type Icon = ComponentType<{ size?: number; 'aria-hidden'?: boolean }>;
 
 interface Article {
   id: string;
+  icon: Icon;
   title: string;
-  tag: 'Pensjon' | 'Sparing' | 'Psykologi' | 'Skatt';
+  tag: 'Pensjon' | 'Sparing' | 'Skatt' | 'Psykologi';
   lead: string;
   body: ReactNode;
 }
 
+/** Fremtidig verdi av månedlig sparing med årlig avkastning r */
+function fv(monthly: number, years: number, r: number) {
+  const rm = Math.pow(1 + r, 1 / 12) - 1;
+  const n = years * 12;
+  return rm === 0 ? monthly * n : (monthly * (Math.pow(1 + rm, n) - 1)) / rm;
+}
+
+const Dots = ({ items }: { items: ReactNode[] }) => (
+  <ul className="dot-list">
+    {items.map((x, i) => (
+      <li key={i}>
+        <span>{x}</span>
+      </li>
+    ))}
+  </ul>
+);
+
+const Steps = ({ items }: { items: [string, string][] }) => (
+  <ol className="num-list">
+    {items.map(([title, text]) => (
+      <li key={title}>
+        <span>
+          <strong>{title}.</strong> {text}
+        </span>
+      </li>
+    ))}
+  </ol>
+);
+
+const Note = ({ children }: { children: ReactNode }) => <div className="note-box">{children}</div>;
+
+// ---------------------------------------------------------------------------
+// Kalkulatorer
+// ---------------------------------------------------------------------------
+
+const SCENARIOS = [
+  { label: 'Mest aksjer', rate: 0.065, note: 'ca. 6,5 % i året' },
+  { label: 'Halvt aksjer', rate: 0.045, note: 'ca. 4,5 % i året' },
+  { label: 'Sparekonto', rate: 0.03, note: 'ca. 3 % i året' },
+];
+
+function GrowthCalculator() {
+  const [monthly, setMonthly] = useState(2000);
+  const [years, setYears] = useState(25);
+  const paid = monthly * 12 * years;
+  return (
+    <section className="card">
+      <h2>Se hva sparingen kan bli</h2>
+      <div className="calc-grid">
+        <Slider label="Sparer per måned" value={monthly} min={500} max={10000} step={500} onChange={setMonthly} format={kr} />
+        <Slider label="I antall år" value={years} min={5} max={40} onChange={setYears} format={(v) => `${v} år`} />
+      </div>
+      <div className="calc-results">
+        {SCENARIOS.map((s, i) => (
+          <div key={s.label} className={`calc-result ${i === 0 ? 'first' : ''}`}>
+            <div className="lbl">
+              {s.label} · {s.note}
+            </div>
+            <div className="big">{kr(fv(monthly, years, s.rate))}</div>
+          </div>
+        ))}
+      </div>
+      <p className="fineprint">
+        Du har satt inn {kr(paid)} selv. Resten er avkastning på avkastningen – rentes rente. Tallene er antatt avkastning før skatt og
+        prisvekst, ikke en garanti.
+      </p>
+    </section>
+  );
+}
+
+function FeeCalculator() {
+  const monthly = 2000;
+  const years = 30;
+  const gross = 0.06;
+  const cheap = fv(monthly, years, gross - 0.002);
+  const expensive = fv(monthly, years, gross - 0.015);
+  return (
+    <>
+      <p>
+        Sparer du {kr(monthly)} i måneden i {years} år med samme avkastning før kostnader (6 %), blir forskjellen stor:
+      </p>
+      <div className="calc-results">
+        <div className="calc-result first">
+          <div className="lbl">Indeksfond · 0,2 % i året</div>
+          <div className="big">{kr(cheap)}</div>
+        </div>
+        <div className="calc-result">
+          <div className="lbl">Aktivt fond · 1,5 % i året</div>
+          <div className="big">{kr(expensive)}</div>
+        </div>
+      </div>
+      <Note>
+        Det er <strong>{kr(cheap - expensive)}</strong> mer til deg – bare ved å velge et billigere fond.
+      </Note>
+    </>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Artikler
+// ---------------------------------------------------------------------------
+
 const ARTICLES: Article[] = [
   {
-    id: 'pilarer',
-    title: 'Slik er pensjonen bygget opp',
-    tag: 'Pensjon',
-    lead: 'Pensjonen din kommer fra tre kilder: folketrygden, arbeidsgiveren og deg selv.',
-    body: (
-      <>
-        <ol>
-          <li><strong>Folketrygden (NAV)</strong> – alderspensjon alle får, basert på inntekten du har hatt gjennom livet.</li>
-          <li><strong>Tjenestepensjon og AFP</strong> – pensjon arbeidsgiveren sparer for deg, pluss eventuell avtalefestet pensjon.</li>
-          <li><strong>Egen sparing</strong> – EPK-S, IPS, fond, aksjer og annen sparing du gjør selv.</li>
-        </ol>
-        <p>
-          For de fleste utgjør folketrygden den største delen. Men folketrygden alene gir sjelden mer enn rundt halvparten av lønnen,
-          og for deg med høy lønn enda mindre – fordi opptjeningen stopper ved 7,1 G.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: 'folketrygden',
-    title: 'Folketrygden',
-    tag: 'Pensjon',
-    lead: 'Statens alderspensjon. Livsvarig, og regulert hvert år.',
+    id: 'nudging',
+    icon: Brain,
+    tag: 'Psykologi',
+    title: 'Nudging – lur deg selv til å spare',
+    lead: 'Små dytt som gjør det riktige valget til det enkleste.',
     body: (
       <>
         <p>
-          Hvert år legges 18,1 % av inntekten din opp til 7,1 G inn i en <strong>pensjonsbeholdning</strong>. Du tjener opp pensjon fra du er
-          13 til du er 75 år. Også foreldrepenger, dagpenger, førstegangstjeneste og omsorg for små barn gir opptjening.
+          Vi utsetter gjerne ting vi vet er lurt. Nudging handler om å rigge hverdagen slik at du sparer uten å måtte bestemme deg på
+          nytt hver måned. Begrepet ble kjent gjennom atferdsøkonomene Richard Thaler og Cass Sunstein.
         </p>
-        <p>
-          Når du tar ut pensjon, deles beholdningen på et <strong>delingstall</strong> som gjenspeiler forventet levealder for ditt årskull.
-          Det kalles levealdersjustering: lever vi lenger, må vi jobbe litt lenger for å få samme årlige pensjon.
-        </p>
-        <ul>
-          <li><strong>Fleksibelt uttak</strong> fra 62 til 75 år. Jo senere du starter, jo mer får du hvert år.</li>
-          <li>For å ta ut før 67 må opptjeningen din være høy nok til at du får minst garantipensjon ved 67.</li>
-          <li>Du kan jobbe ved siden av pensjonen uten at den blir avkortet.</li>
-          <li><strong>Garantipensjon</strong> sikrer en minstepensjon for dem med lav eller ingen opptjening.</li>
-          <li>Aldersgrensene skal gradvis heves for yngre årskull i takt med økt levealder.</li>
-        </ul>
-        <p>Du finner din egen pensjonsbeholdning og kan gjøre beregninger på nav.no.</p>
-      </>
-    ),
-  },
-  {
-    id: 'tjenestepensjon',
-    title: 'Tjenestepensjon',
-    tag: 'Pensjon',
-    lead: 'Pensjonen arbeidsgiveren sparer for deg – i tillegg til lønnen.',
-    body: (
-      <>
-        <p>
-          Alle arbeidsgivere i privat sektor må spare minst <strong>2 % av lønnen</strong> til pensjon for de ansatte (obligatorisk
-          tjenestepensjon, OTP). Det spares fra første krone og første arbeidsdag. Mange arbeidsgivere sparer mer – opptil 7 % av lønn opp
-          til 12 G, pluss inntil 18,1 % ekstra for lønn mellom 7,1 og 12 G.
-        </p>
-        <h4>Ulike typer ordninger</h4>
-        <ul>
-          <li><strong>Innskuddspensjon</strong> – vanligst i privat sektor. Arbeidsgiver setter inn et beløp, og du bærer selv
-            investeringsrisikoen. Utbetales normalt fra uttak til du er minst 80 år (minst 10 år).</li>
-          <li><strong>Ytelsespensjon</strong> – arbeidsgiver lover en pensjon av en viss størrelse. Mindre vanlig i dag.</li>
-          <li><strong>Offentlig tjenestepensjon</strong> (KLP, Statens pensjonskasse m.fl.) – for deg født 1963 eller senere: livsvarig
-            påslag på 5,7 % av lønn opp til 12 G (+18,1 % mellom 7,1 og 12 G).</li>
-        </ul>
-        <h4>Når du bytter jobb</h4>
-        <p>
-          Pensjonen du har tjent opp, blir med deg. Innskuddspensjon samles automatisk i <strong>egen pensjonskonto (EPK)</strong>. Gamle
-          fripoliser og pensjonskapitalbevis kan du ofte flytte selv – det kan gi lavere kostnader.
-        </p>
-        <p><strong>Tips:</strong> Spør om pensjonsordningen når du forhandler lønn. 1 prosentpoeng ekstra pensjonssparing er mye verdt over tid.</p>
-      </>
-    ),
-  },
-  {
-    id: 'epk',
-    title: 'EPK – egen pensjonskonto',
-    tag: 'Pensjon',
-    lead: 'Én konto for all innskuddspensjon – du bestemmer selv over leverandør og aksjeandel.',
-    body: (
-      <>
-        <p>
-          Med egen pensjonskonto samles pensjonen fra nåværende og tidligere arbeidsgivere på ett sted. Du kan velge å flytte kontoen til
-          en annen leverandør, og du kan selv velge hvordan pengene skal investeres.
-        </p>
-        <ul>
-          <li><strong>Livsfaseprofil</strong> (standardvalget hos de fleste): høy aksjeandel mens du er ung, gradvis lavere nær pensjon.</li>
-          <li><strong>Fast aksjeandel</strong>: du velger selv, f.eks. 100 %, 80 % eller 50 % aksjer.</li>
-        </ul>
-        <p>Sjekk kostnadene. Forskjellen mellom 0,2 % og 0,8 % i årlig kostnad kan utgjøre over 10 % av pensjonskapitalen over et arbeidsliv.</p>
-      </>
-    ),
-  },
-  {
-    id: 'epks',
-    title: 'EPK-S – egen sparing med skattefordel',
-    tag: 'Skatt',
-    lead: 'Spar ekstra selv i pensjonskontoen fra arbeidsgiveren, og få 22 % igjen på skatten.',
-    body: (
-      <>
-        <p>
-          Har du innskuddspensjon, kan du selv spare inntil <strong>5 % av lønnen</strong> (opp til 12 G) i egen pensjonskonto – men ikke
-          mer enn arbeidsgiveren sparer for deg. Beløpet trekkes fra lønnen og gir fradrag i alminnelig inntekt.
-        </p>
-        <div className="example">
-          <strong>Eksempel:</strong> Lønn 600 000 kr, arbeidsgiver sparer 5 %. Du sparer 5 % selv = 30 000 kr i året. Du får 6 600 kr i
-          skattefradrag, så spareinnsatsen koster deg egentlig bare 23 400 kr.
-        </div>
-        <ul>
-          <li>Pengene er bundet til du tar ut pensjon, og utbetales som innskuddspensjonen.</li>
-          <li>Utbetalingen skattlegges som pensjonsinntekt.</li>
-          <li>Ordningen må tilbys via arbeidsgiver/leverandør – spør HR om du kan melde deg på.</li>
-        </ul>
-      </>
-    ),
-  },
-  {
-    id: 'afp',
-    title: 'AFP – avtalefestet pensjon',
-    tag: 'Pensjon',
-    lead: 'Et livsvarig tillegg hvis du jobber i en bedrift med AFP-avtale.',
-    body: (
-      <>
-        <p>
-          AFP finnes i hele offentlig sektor og i mange private bedrifter med tariffavtale. I privat sektor er AFP et livsvarig påslag
-          til alderspensjonen som kan tas ut fra 62 år.
-        </p>
-        <ul>
-          <li>Du må normalt ha jobbet i en AFP-bedrift i mange av årene før du fyller 62, og være ansatt der når du tar ut AFP.</li>
-          <li>Bytter du til en bedrift uten AFP rett før pensjon, kan du miste hele AFP-en – sjekk før du bytter jobb!</li>
-          <li>For deg født 1963 eller senere i offentlig sektor er AFP også et livsvarig påslag.</li>
-          <li>AFP-ordningen i privat sektor er under endring. Sjekk vilkårene hos Fellesordningen for AFP eller tillitsvalgt.</li>
-        </ul>
-      </>
-    ),
-  },
-  {
-    id: 'ips',
-    title: 'IPS – individuell pensjonssparing',
-    tag: 'Skatt',
-    lead: 'Spar inntil 15 000 kr i året med 22 % skattefradrag.',
-    body: (
-      <>
-        <p>
-          IPS er pensjonssparing du gjør helt på egen hånd, uavhengig av arbeidsgiver. Du får fradrag i alminnelig inntekt, altså
-          inntil 3 300 kr lavere skatt i året.
-        </p>
-        <ul>
-          <li>Pengene er bundet til du er 62 år, og utbetales over minst 10 år og minst til du er 80.</li>
-          <li>Utbetalingen skattlegges som pensjon. Kapitalen er unntatt formuesskatt underveis.</li>
-          <li>Passer best for deg som har råd til å binde pengene og vil ha en skatterabatt.</li>
-        </ul>
-      </>
-    ),
-  },
-  {
-    id: 'ask',
-    title: 'Aksjesparekonto og fond',
-    tag: 'Sparing',
-    lead: 'Fleksibel langsiktig sparing – du kan ta ut pengene når du vil.',
-    body: (
-      <>
-        <p>
-          På en aksjesparekonto (ASK) kan du kjøpe og selge aksjer og aksjefond uten å skatte av gevinsten før du tar den ut. Det du har
-          satt inn, kan du alltid ta ut skattefritt.
-        </p>
-        <p>
-          For pensjonssparing er <strong>globale indeksfond</strong> med lave kostnader et godt utgangspunkt: bred spredning på tusenvis av
-          selskaper, og lav pris.
-        </p>
-      </>
-    ),
-  },
-  {
-    id: 'spareavtale',
-    title: 'Spareavtale – betal deg selv først',
-    tag: 'Sparing',
-    lead: 'Et fast beløp som trekkes automatisk hver måned. Det enkleste og mest effektive sparegrepet.',
-    body: (
-      <>
-        <ul>
-          <li><strong>Automatisk:</strong> Legg trekket rett etter lønningsdagen, så sparer du før du rekker å bruke pengene.</li>
-          <li><strong>Jevn innkjøpspris:</strong> Du kjøper fond hver måned – billig når markedet er nede, dyrere når det er oppe. Over tid
-            jevner det seg ut, og du slipper å «treffe» riktig tidspunkt.</li>
-          <li><strong>Start smått:</strong> 500 kr i måneden er bedre enn ingenting. Øk beløpet hver gang du får lønnsøkning.</li>
-          <li><strong>Fleksibelt:</strong> Du kan endre, pause eller stoppe avtalen når du vil.</li>
-        </ul>
-        <div className="example">
-          <strong>Rentes rente:</strong> 1 000 kr i måneden i 30 år med 5 % årlig avkastning blir ca. 800 000 kr – selv om du bare har satt
-          inn 360 000 kr.
-        </div>
-      </>
-    ),
-  },
-  {
-    id: 'aksjeandel',
-    title: 'Aksjeandel og risiko',
-    tag: 'Sparing',
-    lead: 'Hvor mye aksjer du bør ha, avhenger mest av hvor lenge det er til du trenger pengene.',
-    body: (
-      <>
-        <p>
-          Aksjer har historisk gitt klart høyere avkastning enn renter over tid, men svinger mye mer. Med lang tidshorisont rekker
-          markedet normalt å hente seg inn etter fall.
-        </p>
-        <table className="table">
-          <thead><tr><th>Tid til pensjon</th><th>Vanlig aksjeandel</th></tr></thead>
-          <tbody>
-            <tr><td>Over 15 år</td><td>80–100 %</td></tr>
-            <tr><td>5–15 år</td><td>50–80 %</td></tr>
-            <tr><td>Under 5 år</td><td>20–50 %</td></tr>
-          </tbody>
-        </table>
-        <p>En livsfaseprofil gjør denne nedtrappingen automatisk for deg.</p>
+        <Dots
+          items={[
+            <><strong>Betal deg selv først.</strong> Legg spareavtalen på lønningsdagen – ikke spar det som er igjen på slutten av måneden.</>,
+            <><strong>Øk når lønna øker.</strong> Gå opp 200–500 kr i måneden ved hvert lønnsoppgjør. Du merker det knapt.</>,
+            <><strong>Gi sparingen et navn.</strong> «Pensjon som 62-åring» motiverer mer enn «Sparekonto 2».</>,
+            <><strong>Gjør uttak litt tungvint.</strong> Hold langsiktig sparing på en konto du ikke ser hver dag.</>,
+            <><strong>Rund opp kjøp.</strong> La banken runde opp kortkjøp og sette mellomlegget i fond.</>,
+          ]}
+        />
+        <Note>
+          Standardvalg er sterke – de fleste beholder det som er valgt for dem. Sørg for at standardvalgene dine (fast sparing, aksjeandel i
+          pensjonen) er valg du faktisk ønsker. Appen gir deg dytt under «Forslag til deg» – alltid basert på dine egne tall.
+        </Note>
       </>
     ),
   },
   {
     id: 'is-i-magen',
-    title: 'Is i magen',
+    icon: Anchor,
     tag: 'Psykologi',
-    lead: 'Den viktigste egenskapen for en langsiktig sparer: å sitte stille når markedet faller.',
+    title: 'Is i magen når markedet faller',
+    lead: 'Fall i aksjemarkedet er normalt – å selge i panikk er dyrt.',
     body: (
       <>
         <p>
-          Børsen vil falle – mange ganger – i løpet av spareperioden din. Under finanskrisen i 2008 falt verdens aksjemarkeder rundt 40–50
-          %, og under koronakrisen i 2020 falt de rundt 30 % på noen uker. I begge tilfeller hentet markedet seg inn igjen.
+          Aksjemarkedet faller med jevne mellomrom, av og til kraftig. Under finanskrisen i 2008 falt verdens aksjemarkeder rundt 40–50 %, og
+          under koronakrisen i 2020 rundt 30 % på noen uker. Brede, globale markeder har likevel hentet seg inn igjen over tid. De som tapte
+          mest, var ofte de som solgte på bunnen.
         </p>
-        <ul>
-          <li><strong>Ikke selg i panikk.</strong> Den som selger etter et fall, gjør tapet permanent og går ofte glipp av oppgangen.</li>
-          <li><strong>Fortsett spareavtalen.</strong> Når kursene er lave, får du mer for pengene.</li>
-          <li><strong>Ikke sjekk saldoen hver dag.</strong> Jo oftere du ser, jo oftere ser du tap – og jo mer fristes du til å gjøre noe.</li>
-          <li><strong>Ha en buffer.</strong> Penger du trenger de neste årene, hører hjemme på sparekonto – ikke i aksjer.</li>
-        </ul>
-        <p>Pensjonssparing er et maraton. Det som teller, er hvor mye du har den dagen du går av – ikke hva saldoen var i et dårlig år.</p>
+        <Dots
+          items={[
+            <><strong>Tenk i tiår, ikke dager.</strong> Penger du trenger om mer enn 10 år, tåler svingninger.</>,
+            <><strong>Fortsett spareavtalen.</strong> Når kursene er lave, får du flere andeler for de samme kronene.</>,
+            <><strong>Sjekk sjeldnere.</strong> Jo oftere du ser på saldoen, jo mer ser du av svingningene.</>,
+            <><strong>Ha en buffer.</strong> 2–3 månedslønner på sparekonto gjør at du slipper å selge fond når noe uventet skjer.</>,
+            <><strong>Bestem deg på forhånd.</strong> Hva gjør du hvis markedet faller 20 %? Som regel er svaret: ingenting.</>,
+          ]}
+        />
       </>
     ),
   },
   {
-    id: 'nudging',
-    title: 'Nudging – små dytt, store forskjeller',
-    tag: 'Psykologi',
-    lead: 'Hvorfor vi utsetter sparing – og hvordan smarte standardvalg hjelper oss.',
+    id: 'spre',
+    icon: ChartPie,
+    tag: 'Sparing',
+    title: 'Spre investeringene',
+    lead: 'Ikke legg alle eggene i én kurv.',
     body: (
       <>
         <p>
-          Nudging (dulting) betyr å utforme valg slik at det blir lettere å gjøre det vi egentlig ønsker. Begrepet ble kjent gjennom
-          atferdsøkonomene Richard Thaler og Cass Sunstein. Forskningen viser at folk sparer langt mer når sparing er standardvalget.
+          Ett selskap kan gå konkurs, men det er svært lite sannsynlig at tusenvis av selskaper i hele verden gjør det samtidig. Spredning gir
+          deg markedets avkastning med mindre risiko.
         </p>
-        <h4>Typiske feller</h4>
-        <ul>
-          <li><strong>Utsettelse:</strong> «Jeg begynner neste år» – men neste år kommer aldri.</li>
-          <li><strong>Nåtidsskjevhet:</strong> Vi verdsetter penger i dag mye høyere enn penger om 30 år.</li>
-          <li><strong>Treghet:</strong> Vi beholder det som er valgt for oss, også når det ikke passer.</li>
-        </ul>
-        <h4>Dytt du kan gi deg selv</h4>
-        <ul>
-          <li>Gjør sparingen automatisk med spareavtale.</li>
-          <li>Øk sparingen samtidig med lønnsøkningen («spar mer i morgen»), så merker du det ikke.</li>
-          <li>Se for deg deg selv som pensjonist – det gjør det lettere å prioritere fremtiden.</li>
-          <li>Sett et konkret mål, f.eks. 80 % av dagens lønn.</li>
-        </ul>
-        <p>Appen bruker dytt som «Forslag til deg» på oversikten – alltid basert på dine egne tall, og du bestemmer selv.</p>
+        <Dots
+          items={[
+            <><strong>Globale indeksfond</strong> er en enkel grunnmur – ett fond gir deg tusenvis av selskaper i mange land.</>,
+            <><strong>Spre over tid</strong> med fast månedlig sparing i stedet for å prøve å treffe riktig tidspunkt.</>,
+            <><strong>Ikke for mye i én aksje</strong> – heller ikke i arbeidsgiveren din. Går det dårlig, kan du miste både jobb og sparepenger.</>,
+            <><strong>Se helheten.</strong> Pensjon, ASK, fond og sparekonto er én portefølje.</>,
+            <><strong>Juster risikoen med alderen.</strong> Litt mindre aksjer de siste årene før du trenger pengene.</>,
+          ]}
+        />
       </>
     ),
   },
   {
-    id: '80',
-    title: 'Hvorfor 80 % av lønnen?',
+    id: 'epk',
+    icon: Gauge,
     tag: 'Pensjon',
-    lead: 'En tommelfingerregel for hvor mye pensjon du trenger for å beholde levestandarden.',
+    title: 'EPK – sjekk aksjeandelen din',
+    lead: 'Egen pensjonskonto er kanskje din største sparekonto.',
     body: (
       <>
         <p>
-          Som pensjonist har mange lavere utgifter: boliglånet er ofte nedbetalt, du sparer ikke lenger til pensjon, og du har ikke
-          jobbreiser. Pensjon skattlegges også litt lavere enn lønn. Derfor regnes 70–80 % av lønnen før skatt ofte som nok til å
-          opprettholde levestandarden.
+          All innskuddspensjon fra arbeidsgivere samles i <strong>egen pensjonskonto (EPK)</strong>. Arbeidsgiveren setter inn pengene, men{' '}
+          <strong>du</strong> bestemmer hvor mye som skal stå i aksjer. Mange har aldri sjekket det.
         </p>
-        <p>Har du fortsatt lån, eller ønsker du å reise mye de første årene, kan du trenge mer. Du kan endre målet under «Profil».</p>
+        <Steps
+          items={[
+            ['Finn leverandøren', 'Logg inn på norskpensjon.no med BankID og se hvem som forvalter pensjonen din – eller koble til i appen.'],
+            ['Logg inn hos leverandøren', 'Se etter «spareprofil» eller «investeringsvalg».'],
+            ['Velg aksjeandel', 'Vanlige valg er 100, 80, 50 eller 20 % aksjer, eller en livsfaseprofil som trapper ned automatisk mot pensjon.'],
+            ['Sjekk kostnadene', 'Forskjeller på bare 0,5 prosentpoeng i året betyr mye over 30 år.'],
+            ['Vurder EPK-S', 'Du kan velge en annen leverandør selv hvis du vil ha lavere kostnader eller andre fond.'],
+          ]}
+        />
+        <Note>
+          Tommelfingerregel: er det mer enn 15 år til du skal ta ut pensjon, velger mange høy aksjeandel. En livsfaseprofil passer deg som
+          ikke vil følge med selv. Valget er ditt, og det kan endres når som helst – også under «Spar» i appen.
+        </Note>
+      </>
+    ),
+  },
+  {
+    id: 'epk-s',
+    icon: Repeat,
+    tag: 'Pensjon',
+    title: 'EPK-S – egen pensjonskonto selvvalgt',
+    lead: 'Velg selv hvor pensjonen fra arbeidsgiveren skal forvaltes – med samme skattefordeler som EPK.',
+    body: (
+      <>
+        <p>
+          Med <strong>EPK-S</strong> velger du selv hvilken leverandør som skal forvalte den egne pensjonskontoen din, i stedet for
+          leverandøren arbeidsgiveren har valgt. Innskuddene fra arbeidsgiveren går da til kontoen du har valgt.
+        </p>
+        <h4>Samme skattefordeler som EPK</h4>
+        <Dots
+          items={[
+            'Innskuddene fra arbeidsgiver skattlegges ikke som lønn når de settes inn.',
+            'Pensjonskapitalen er fritatt for formuesskatt, og avkastningen skattlegges ikke underveis.',
+            'Utbetalingen skattlegges som pensjon, og pengene er bundet til du tar ut pensjon.',
+          ]}
+        />
+        <h4>Hvorfor velge selv?</h4>
+        <Dots
+          items={[
+            'Lavere forvaltningskostnader.',
+            'Et fondsutvalg og en aksjeandel som passer deg bedre.',
+            'Pensjonen samlet hos samme bank som resten av sparingen din.',
+          ]}
+        />
+        <Note>
+          Sammenlign kostnader og investeringsvalg før du flytter, og sjekk om det er gebyrer knyttet til kontoen. Flyttingen bestilles hos
+          leverandøren du vil flytte til.
+        </Note>
+      </>
+    ),
+  },
+  {
+    id: 'eget-innskudd',
+    icon: HandCoins,
+    tag: 'Skatt',
+    title: 'Eget innskudd i pensjonskontoen',
+    lead: 'Spar ekstra i EPK/EPK-S via lønna og få 22 % igjen på skatten.',
+    body: (
+      <>
+        <p>
+          Har arbeidsgiveren innskuddspensjon, kan du selv spare inntil <strong>5 % av lønnen</strong> (opp til 12 G) i pensjonskontoen – men
+          ikke mer enn arbeidsgiveren sparer for deg. Beløpet trekkes fra lønnen og gir fradrag i alminnelig inntekt.
+        </p>
+        <Note>
+          <strong>Eksempel:</strong> Lønn 600 000 kr, arbeidsgiver sparer 5 %. Du sparer 5 % selv = 30 000 kr i året. Du får 6 600 kr i
+          skattefradrag, så det koster deg egentlig 23 400 kr.
+        </Note>
+        <p>Pengene er bundet til uttak av pensjon. Spør arbeidsgiveren eller leverandøren hvordan du melder deg på.</p>
       </>
     ),
   },
   {
     id: 'kostnader',
-    title: 'Kostnader betyr mye',
+    icon: Receipt,
     tag: 'Sparing',
+    title: 'Kostnader – det du betaler, får du aldri igjen',
     lead: 'Små prosenter blir store beløp over tid.',
-    body: (
-      <p>
-        Sparer du 2 000 kr i måneden i 30 år, kan forskjellen mellom en årlig kostnad på 0,2 % og 1,5 % bli flere hundre tusen kroner.
-        Sammenlign forvaltningshonorar på pensjonskontoen og fondene dine – og vurder indeksfond.
-      </p>
-    ),
+    body: <FeeCalculator />,
   },
   {
-    id: 'skatt',
-    title: 'Skatt på pensjon',
+    id: 'kontoer',
+    icon: Wallet,
     tag: 'Skatt',
-    lead: 'Pensjon skattlegges litt annerledes enn lønn.',
-    body: (
-      <ul>
-        <li>Alderspensjon, AFP, tjenestepensjon, EPK-S og IPS skattlegges som pensjonsinntekt.</li>
-        <li>Trygdeavgiften er lavere på pensjon enn på lønn, og det gis et eget skattefradrag for lave pensjoner.</li>
-        <li>Tallene i appen er før skatt, slik at de kan sammenlignes med bruttolønnen din.</li>
-      </ul>
-    ),
-  },
-  {
-    id: 'deltid',
-    title: 'Deltid, permisjon og pensjon',
-    tag: 'Pensjon',
-    lead: 'Perioder med lav inntekt gir lavere pensjon resten av livet.',
+    title: 'ASK, IPS og BSU',
+    lead: 'Riktig konto til riktig formål.',
     body: (
       <>
-        <p>
-          Jobber du deltid, får du lavere opptjening både i folketrygden og tjenestepensjonen. Mange kvinner får derfor betydelig lavere
-          pensjon enn menn. Omsorg for barn under 6 år gir en viss opptjening i folketrygden, men ikke i tjenestepensjonen.
-        </p>
-        <p>Er dere to, kan det være lurt å snakke om hvordan dere fordeler deltid og sparing – slik at ingen taper på det.</p>
+        <Dots
+          items={[
+            <><strong>Aksjesparekonto (ASK):</strong> Bytt fond og aksjer uten å skatte underveis. Skatt betales først når du tar ut gevinst – det du har satt inn, kan tas ut skattefritt.</>,
+            <><strong>Individuell pensjonssparing (IPS):</strong> Inntil 15 000 kr i året med 22 % skattefradrag. Låst til du fyller 62, utbetales over minst 10 år og til minst 80 år.</>,
+            <><strong>BSU:</strong> Er du under 34 og skal kjøpe bolig, gir BSU skattefradrag hvert år – ofte den beste risikofrie avkastningen du kan få.</>,
+          ]}
+        />
+        <Note>Beløpsgrenser og satser endres. Sjekk gjeldende regler hos Skatteetaten før du bestemmer deg.</Note>
       </>
     ),
   },
   {
-    id: 'sjekkliste',
-    title: 'Sjekkliste: 7 grep for bedre pensjon',
+    id: 'spareavtale',
+    icon: PiggyBank,
     tag: 'Sparing',
-    lead: 'Gjør dette én gang i året.',
+    title: 'Spareavtale',
+    lead: 'Et fast beløp som trekkes automatisk hver måned.',
     body: (
-      <ol>
-        <li>Koble til Norsk Pensjon og NAV for å se alt du har.</li>
-        <li>Sjekk at aksjeandelen passer med hvor lenge det er til pensjon.</li>
-        <li>Samle gamle fripoliser og pensjonskapitalbevis og sjekk kostnadene.</li>
-        <li>Benytt EPK-S hvis arbeidsgiveren din tilbyr det.</li>
-        <li>Vurder IPS for skattefradraget.</li>
-        <li>Sett opp en spareavtale – og øk den ved lønnsøkning.</li>
-        <li>Sjekk om du har AFP før du bytter jobb etter fylte 50.</li>
-      </ol>
+      <>
+        <Dots
+          items={[
+            <><strong>Automatisk:</strong> Legg trekket rett etter lønningsdagen.</>,
+            <><strong>Jevn innkjøpspris:</strong> Du kjøper hver måned – billig når markedet er nede, dyrere når det er oppe. Du slipper å treffe riktig tidspunkt.</>,
+            <><strong>Start smått:</strong> 500 kr i måneden er mye bedre enn ingenting.</>,
+            <><strong>Fleksibelt:</strong> Du kan endre, pause eller stoppe avtalen når du vil.</>,
+          ]}
+        />
+        <Note>Under «Spar» kan du opprette en spareavtale og se med en gang hvor mye mer pensjon den gir.</Note>
+      </>
+    ),
+  },
+  {
+    id: 'folketrygden',
+    icon: Landmark,
+    tag: 'Pensjon',
+    title: 'Folketrygden',
+    lead: 'Grunnmuren i pensjonen din – og hva du kan påvirke.',
+    body: (
+      <>
+        <Dots
+          items={[
+            <>Hvert år du jobber, tjener du opp <strong>18,1 %</strong> av inntekten din i pensjon fra folketrygden, opp til et tak på 7,1 G.</>,
+            <>Du kan ta ut pensjon fra <strong>62 til 75 år</strong>. Jo senere du starter, jo høyere blir den årlige pensjonen, fordi den skal vare i færre år.</>,
+            <>Du kan <strong>jobbe og ta ut pensjon samtidig</strong> uten at pensjonen fra NAV blir avkortet.</>,
+            <>Beholdningen deles på et <strong>delingstall</strong> basert på forventet levealder for årskullet ditt (levealdersjustering).</>,
+            <>Lav eller ingen opptjening gir rett til <strong>garantipensjon</strong> fra 67 år.</>,
+            <>Også foreldrepenger, dagpenger, førstegangstjeneste og omsorg for små barn gir opptjening.</>,
+          ]}
+        />
+        <Note>På «Pensjonen min» kan du dra i uttaksalderen og se forskjellen selv.</Note>
+      </>
+    ),
+  },
+  {
+    id: 'tjenestepensjon',
+    icon: Briefcase,
+    tag: 'Pensjon',
+    title: 'Tjenestepensjon',
+    lead: 'Pensjonen arbeidsgiveren sparer for deg – i tillegg til lønnen.',
+    body: (
+      <>
+        <p>
+          Alle arbeidsgivere i privat sektor må spare minst <strong>2 % av lønnen</strong> til pensjon (obligatorisk tjenestepensjon), fra
+          første krone og første arbeidsdag. Mange sparer mer – opptil 7 % av lønn opp til 12 G, pluss inntil 18,1 % ekstra for lønn mellom
+          7,1 og 12 G.
+        </p>
+        <Dots
+          items={[
+            <><strong>Innskuddspensjon</strong> – vanligst i privat sektor. Utbetales minst 10 år og til minst 80 år.</>,
+            <><strong>Ytelsespensjon</strong> – arbeidsgiver lover en pensjon av en viss størrelse. Mindre vanlig i dag.</>,
+            <><strong>Offentlig tjenestepensjon</strong> (KLP, Statens pensjonskasse m.fl.) – livsvarig påslag for deg født 1963 eller senere.</>,
+            <><strong>Bytter du jobb</strong>, blir pensjonen med deg. Gamle fripoliser og pensjonskapitalbevis kan ofte flyttes for lavere kostnader.</>,
+          ]}
+        />
+        <Note>Spør om pensjonsordningen når du forhandler lønn. Ett prosentpoeng mer pensjonssparing er mye verdt over tid.</Note>
+      </>
+    ),
+  },
+  {
+    id: 'afp',
+    icon: Scale,
+    tag: 'Pensjon',
+    title: 'AFP – avtalefestet pensjon',
+    lead: 'Et livsvarig tillegg hvis du jobber i en bedrift med AFP-avtale.',
+    body: (
+      <Dots
+        items={[
+          'AFP finnes i hele offentlig sektor og i mange private bedrifter med tariffavtale.',
+          'Du må normalt ha jobbet i en AFP-bedrift i mange av årene før du fyller 62, og være ansatt der når du tar ut AFP.',
+          'Bytter du til en bedrift uten AFP rett før pensjon, kan du miste hele AFP-en – sjekk før du bytter jobb!',
+          'AFP-ordningen i privat sektor er under endring. Sjekk vilkårene hos Fellesordningen for AFP eller tillitsvalgt.',
+        ]}
+      />
+    ),
+  },
+  {
+    id: '80',
+    icon: Target,
+    tag: 'Pensjon',
+    title: 'Hvorfor 80 % av lønnen?',
+    lead: 'En tommelfingerregel for hvor mye pensjon du trenger.',
+    body: (
+      <p>
+        Som pensjonist har mange lavere utgifter: boliglånet er ofte nedbetalt, du sparer ikke lenger til pensjon, og du har ikke
+        jobbreiser. Pensjon skattlegges også litt lavere enn lønn. Derfor regnes 70–80 % av lønnen før skatt ofte som nok til å
+        opprettholde levestandarden. Du kan endre målet under «Profil».
+      </p>
+    ),
+  },
+  {
+    id: 'deltid',
+    icon: Users,
+    tag: 'Pensjon',
+    title: 'Deltid, permisjon og pensjon',
+    lead: 'Perioder med lav inntekt gir lavere pensjon resten av livet.',
+    body: (
+      <p>
+        Jobber du deltid, får du lavere opptjening både i folketrygden og tjenestepensjonen. Omsorg for barn under 6 år gir en viss
+        opptjening i folketrygden, men ikke i tjenestepensjonen. Er dere to, kan det være lurt å snakke om hvordan dere fordeler deltid og
+        sparing – slik at ingen taper på det.
+      </p>
     ),
   },
 ];
 
 const TAGS = ['Alle', 'Pensjon', 'Sparing', 'Skatt', 'Psykologi'] as const;
 
-export function Laer() {
+export function Laer({ go }: { go: (t: TabId) => void }) {
   const [tag, setTag] = useState<(typeof TAGS)[number]>('Alle');
   const [q, setQ] = useState('');
   const list = ARTICLES.filter(
@@ -360,30 +447,85 @@ export function Laer() {
   );
   return (
     <div className="stack">
+      <header className="page-head">
+        <h1>Lær</h1>
+        <p>Korte, ærlige råd om hvordan du får mer ut av pengene dine – uten å bli finansekspert.</p>
+      </header>
+
       <section className="card">
-        <h2>Lær om pensjon og sparing</h2>
-        <p className="muted">Kort og enkelt om det du trenger å vite.</p>
-        <input className="search" placeholder="Søk, f.eks. «AFP» eller «skatt»" value={q} onChange={(e) => setQ(e.target.value)} />
-        <div className="chips">
-          {TAGS.map((t) => (
-            <button key={t} className={`chip ${tag === t ? 'chip-on' : ''}`} onClick={() => setTag(t)}>{t}</button>
+        <div className="learn-steps">
+          {[
+            ['Spar automatisk', 'Fast trekk på lønningsdagen slår gode intensjoner.'],
+            ['Spre pengene', 'Mange selskaper, mange land, lave kostnader.'],
+            ['Sitt stille', 'Lang tidshorisont tåler at markedet faller innimellom.'],
+          ].map(([title, text], i) => (
+            <div key={title} className="learn-step">
+              <span className="step-n">{i + 1}</span>
+              <div>
+                <strong>{title}</strong>
+                <p className="muted" style={{ margin: 0 }}>{text}</p>
+              </div>
+            </div>
           ))}
         </div>
       </section>
+
+      <GrowthCalculator />
+
+      <h2>Råd og fakta</h2>
+      <input className="search" placeholder="Søk, f.eks. «AFP», «EPK-S» eller «skatt»" value={q} onChange={(e) => setQ(e.target.value)} />
+      <div className="chips">
+        {TAGS.map((t) => (
+          <button key={t} className={`chip ${tag === t ? 'chip-on' : ''}`} onClick={() => setTag(t)}>
+            {t}
+          </button>
+        ))}
+      </div>
       <div className="articles">
         {list.map((a) => (
           <details key={a.id} className="article card">
             <summary>
-              <span className="tag">{a.tag}</span>
-              <h3>{a.title}</h3>
-              <p className="muted">{a.lead}</p>
+              <span className="icon-chip">
+                <a.icon size={20} aria-hidden />
+              </span>
+              <div>
+                <h3>{a.title}</h3>
+                <p className="muted">{a.lead}</p>
+              </div>
             </summary>
             <div className="article-body">{a.body}</div>
           </details>
         ))}
         {list.length === 0 && <p className="muted">Ingen treff.</p>}
       </div>
-      <p className="fineprint">Informasjonen er generell og ikke personlig finansiell rådgivning. Regler og satser kan endres – sjekk nav.no og leverandøren din.</p>
+
+      <section className="card">
+        <div className="card-head">
+          <div>
+            <h2>
+              <ListChecks size={20} aria-hidden style={{ verticalAlign: '-3px', marginRight: 6 }} />
+              Kom i gang i dag
+            </h2>
+            <p className="muted">Fem minutter nå er verdt mer enn en perfekt plan senere.</p>
+          </div>
+        </div>
+        <ol className="num-list">
+          <li><span>Sett opp en fast månedlig sparing i et globalt indeksfond – selv 500 kr er en god start.</span></li>
+          <li><span>Sjekk aksjeandelen og kostnadene i EPK-en din, og vurder EPK-S.</span></li>
+          <li><span>Bruk eget innskudd i pensjonskontoen eller IPS for skattefradraget.</span></li>
+          <li><span>Bygg en buffer på sparekonto før du tar mer risiko.</span></li>
+          <li><span>Sjekk om du har AFP før du bytter jobb etter fylte 50.</span></li>
+          <li><span>Se over sparingen én gang i året – ikke hver dag.</span></li>
+        </ol>
+        <button className="btn btn-primary" onClick={() => go('spar')}>
+          Start sparing <ArrowRight size={16} aria-hidden style={{ verticalAlign: '-3px' }} />
+        </button>
+      </section>
+
+      <p className="fineprint">
+        <Sprout size={14} aria-hidden style={{ verticalAlign: '-2px' }} /> Generell informasjon, ikke personlig finansiell rådgivning.
+        Historisk avkastning er ingen garanti for fremtidig avkastning. Regler og satser kan endres – sjekk nav.no og leverandøren din.
+      </p>
     </div>
   );
 }

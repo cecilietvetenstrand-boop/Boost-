@@ -7,7 +7,7 @@ import {
   capitalForAnnuity,
   employerContribution,
   lifecycleShare,
-  maxEpksRate,
+  maxSelfRate,
   monthlySavingForTarget,
   payoutYears,
   selfContribution,
@@ -24,9 +24,9 @@ describe('regler', () => {
     expect(payoutYears(72)).toBe(10);
   });
 
-  it('EPK-S er maks 5 % og maks arbeidsgivers sats', () => {
-    expect(maxEpksRate({ ...profile, employerRate: 7 })).toBe(5);
-    expect(maxEpksRate({ ...profile, employerRate: 3 })).toBe(3);
+  it('eget innskudd er maks 5 % og maks arbeidsgivers sats', () => {
+    expect(maxSelfRate({ ...profile, employerRate: 7 })).toBe(5);
+    expect(maxSelfRate({ ...profile, employerRate: 3 })).toBe(3);
     expect(selfContribution({ ...profile, employerRate: 3, epkSelfRate: 5 })).toBeCloseTo(0.03 * profile.salary);
   });
 

@@ -37,6 +37,7 @@ type Action =
 
 const sameAccount = (a: PensionAccount, b: PensionAccount) =>
   a.id === b.id || (a.provider === b.provider && a.kind === b.kind && a.active === b.active);
+// Merk: EPK og EPK-S hos samme leverandør regnes som ulike kontoer.
 
 function reducer(state: AppState, action: Action): AppState {
   switch (action.type) {

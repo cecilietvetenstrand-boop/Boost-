@@ -19,7 +19,7 @@ export interface Profile {
   employerRate: number;
   /** Tilleggssats for lønn mellom 7,1G og 12G (0–18,1) */
   employerRateAbove71G: number;
-  /** Egen sparing i EPK-S (prosent av lønn, maks 5 og maks arbeidsgivers sats) */
+  /** Eget innskudd i pensjonskontoen (prosent av lønn, maks 5 og maks arbeidsgivers sats) */
   epkSelfRate: number;
   /** Pensjonsbeholdning i folketrygden hentet fra NAV (valgfri) */
   folketrygdBeholdning?: number;
@@ -29,6 +29,7 @@ export interface Profile {
   payoutReturn: number;
 }
 
+/** EPK = egen pensjonskonto hos arbeidsgivers leverandør. EPK-S = egen pensjonskonto selvvalgt (du har valgt leverandør selv). */
 export type PensionKind = 'EPK' | 'EPK-S' | 'Fripolise' | 'PKB' | 'Offentlig TP';
 
 export interface PensionAccount {

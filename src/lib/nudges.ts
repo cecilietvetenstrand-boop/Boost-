@@ -1,6 +1,6 @@
 // Personlige "dytt" (nudges): små, konkrete forslag basert på brukerens egne tall.
 import type { AppState } from './types';
-import { calcSummary, maxEpksRate, type PensionSummary } from './calc';
+import { calcSummary, maxSelfRate, type PensionSummary } from './calc';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from './constants';
 import { kr } from './format';
 
@@ -28,19 +28,19 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
     });
   }
 
-  const maxRate = maxEpksRate(p);
+  const maxRate = maxSelfRate(p);
   if (p.tjenestepensjon === 'innskudd' && p.epkSelfRate < maxRate) {
     const extraRate = maxRate - p.epkSelfRate;
     const yearly = (extraRate / 100) * p.salary;
     const better = calcSummary({ ...state, profile: { ...p, epkSelfRate: maxRate } });
     out.push({
-      id: 'epks',
+      id: 'eget-innskudd',
       tone: 'good',
-      title: 'Du går glipp av skattefradrag i EPK-S',
-      text: `Sparer du ${maxRate} % selv i EPK-S (ca. ${kr(yearly / 12)}/mnd), får du ${kr(
+      title: 'Spar selv i pensjonskontoen – med skattefradrag',
+      text: `Setter du inn ${maxRate} % selv i pensjonskontoen (ca. ${kr(yearly / 12)}/mnd), får du ${kr(
         yearly * TAX_RATE_ORDINARY_INCOME,
       )} i skattefradrag i året og ca. ${kr((better.totalYearly - s.totalYearly) / 12)} mer i pensjon per måned.`,
-      action: { label: 'Se EPK-S', tab: 'pensjon' },
+      action: { label: 'Se eget innskudd', tab: 'pensjon' },
     });
   }
 
@@ -67,6 +67,17 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
       title: 'Lav aksjeandel med lang tid igjen',
       text: `${lowShare.length} pensjonskonto(er) har under 60 % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Over lang tid gir aksjer normalt mer pensjon.`,
       action: { label: 'Endre aksjeandel', tab: 'spar' },
+    });
+  }
+
+  const epk = state.pensionAccounts.find((a) => a.kind === 'EPK' && a.active);
+  if (epk && epk.fee >= 0.4 && !state.pensionAccounts.some((a) => a.kind === 'EPK-S')) {
+    out.push({
+      id: 'epk-s',
+      tone: 'info',
+      title: 'Vurder EPK-S – velg leverandør selv',
+      text: `Pensjonskontoen din hos ${epk.provider} koster ${epk.fee.toLocaleString('nb-NO')} % i året. Med EPK-S (egen pensjonskonto selvvalgt) kan du flytte den til en leverandør du velger selv – med samme skattefordeler.`,
+      action: { label: 'Les om EPK-S', tab: 'laer' },
     });
   }
 

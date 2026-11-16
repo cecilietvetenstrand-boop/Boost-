@@ -1,10 +1,10 @@
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, TextField } from '../components/ui';
-import { GrowthChart } from '../components/charts';
+import { GrowthChart, SOURCE_COLOR, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, epksTaxBenefit, maxEpksRate } from '../lib/calc';
-import { G, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
+import { calcSummary, selfContributionTaxBenefit, maxSelfRate, summaryByWithdrawalAge } from '../lib/calc';
+import { G, MAX_WITHDRAWAL_AGE, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
 import type { PensionAccount, PensionKind } from '../lib/types';
 import type { TabId } from '../lib/nudges';
 
@@ -13,8 +13,19 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
   const p = state.profile;
   const set = (patch: Partial<typeof p>) => dispatch({ type: 'profile', patch });
   const ft = s.folketrygd;
-  const maxRate = maxEpksRate(p);
+  const maxRate = maxSelfRate(p);
   const withMaxEpks = calcSummary({ ...state, profile: { ...p, epkSelfRate: maxRate } });
+
+  const byAge = useMemo(() => summaryByWithdrawalAge(state), [state]);
+  const birthYear = p.birthYear;
+  const sourceSub: Record<string, string> = {
+    folketrygd: 'NAV · livsvarig',
+    afp: 'Avtalefestet pensjon · livsvarig',
+    offentligTp: 'Offentlig arbeidsgiver · livsvarig',
+    epk: `Arbeidsgiver · ${s.payoutYears} år`,
+    egen: `Eget innskudd · ${s.payoutYears} år`,
+    savings: `Valgt sparing · ${s.payoutYears} år`,
+  };
 
   const growthSeries = s.pensionAccounts.map((a, i) => ({
     key: a.id,
@@ -25,6 +36,60 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
 
   return (
     <div className="stack">
+      <header className="page-head">
+        <h1>Din pensjon</h1>
+        <p>
+          Du er {s.age} år og tjener {kr(p.salary)} i året
+        </p>
+      </header>
+
+      <section className="age-hero">
+        <p className="age-hero-label">Hvis du tar ut pensjon ved</p>
+        <p className="age-hero-age">{p.withdrawalAge} år</p>
+        <div className="age-hero-panel">
+          <Slider
+            label="Uttaksalder"
+            value={p.withdrawalAge}
+            min={Math.max(MIN_WITHDRAWAL_AGE, s.age)}
+            max={MAX_WITHDRAWAL_AGE}
+            onChange={(v) => set({ withdrawalAge: v })}
+            format={(v) => `${v} år · ${birthYear + v}`}
+          />
+          <div className="age-hero-nums">
+            <div>
+              <div className="lbl">Per måned</div>
+              <div className="big">{kr(s.totalYearly / 12)}</div>
+            </div>
+            <div>
+              <div className="lbl">Per år, før skatt</div>
+              <div className="big">{kr(s.totalYearly)}</div>
+            </div>
+          </div>
+          <p className="fineprint">
+            {pct(s.replacementRate)} av dagens lønn · om {s.yearsToWithdrawal} år ({birthYear + p.withdrawalAge})
+          </p>
+        </div>
+      </section>
+
+      <Card title="Hva pensjonen består av" subtitle="Beløp per måned før skatt, i dagens kroner">
+        <ul className="source-list">
+          {s.bySource.map((x) => (
+            <li key={x.key}>
+              <span className="source-dot" style={{ background: SOURCE_COLOR[x.key] }} />
+              <div>
+                <div className="src-name">{x.label}</div>
+                <div className="src-sub">{sourceSub[x.key]}</div>
+              </div>
+              <div className="src-val">{kr(x.yearly / 12)}</div>
+            </li>
+          ))}
+        </ul>
+      </Card>
+
+      <Card title="Uttak ved ulike aldre" subtitle="Trykk på en søyle for å velge alder. Jo senere uttak, jo mer per måned.">
+        <WithdrawalAgeChart data={byAge} selected={p.withdrawalAge} salary={p.salary} onSelect={(a) => set({ withdrawalAge: a })} />
+      </Card>
+
       <Card
         title="Folketrygden (NAV)"
         subtitle="Alderspensjon fra staten – livsvarig"
@@ -100,7 +165,7 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
       </Card>
 
       {p.tjenestepensjon === 'innskudd' && (
-        <Card title="EPK-S – egen sparing med skattefordel" subtitle="Spar selv i egen pensjonskonto og få 22 % skattefradrag">
+        <Card title="Eget innskudd i pensjonskontoen" subtitle="Spar selv i EPK/EPK-S via lønna og få 22 % skattefradrag">
           <Slider
             label="Egen sparesats"
             value={Math.min(p.epkSelfRate, maxRate)}
@@ -112,11 +177,11 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
           />
           <div className="stats">
             <Stat label="Du sparer" value={`${kr(s.selfContribution / 12)}/mnd`} />
-            <Stat label="Skattefradrag" value={`${kr(epksTaxBenefit(p))}/år`} tone="good" />
-            <Stat label="Netto kostnad" value={`${kr((s.selfContribution - epksTaxBenefit(p)) / 12)}/mnd`} />
+            <Stat label="Skattefradrag" value={`${kr(selfContributionTaxBenefit(p))}/år`} tone="good" />
+            <Stat label="Netto kostnad" value={`${kr((s.selfContribution - selfContributionTaxBenefit(p)) / 12)}/mnd`} />
             <Stat
               label="Mer pensjon"
-              value={`${kr((s.bySource.find((x) => x.key === 'epks')?.yearly ?? 0) / 12)}/mnd`}
+              value={`${kr((s.bySource.find((x) => x.key === 'egen')?.yearly ?? 0) / 12)}/mnd`}
               hint={`Til ${p.withdrawalAge + s.payoutYears} år`}
             />
           </div>
@@ -149,12 +214,16 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
 
       <Card
         title="Pensjonskontoer"
-        subtitle="EPK, EPK-S, fripoliser og pensjonskapitalbevis"
+        subtitle="EPK, EPK-S (selvvalgt), fripoliser og pensjonskapitalbevis"
         actions={<button className="btn btn-ghost btn-small" onClick={() => go('koblinger')}>Hent automatisk</button>}
       >
         {state.pensionAccounts.length === 0 && (
           <Callout>Ingen kontoer registrert ennå. Vi beregner EPK ut fra lønn og sparesats. Koble til Norsk Pensjon for faktisk saldo.</Callout>
         )}
+        <p className="muted">
+          <strong>EPK</strong> er pensjonskontoen hos leverandøren arbeidsgiveren har valgt. <strong>EPK-S</strong> (egen pensjonskonto
+          selvvalgt) er når du selv har valgt leverandør – innskuddene fra arbeidsgiver går dit, med de samme skattefordelene.
+        </p>
         <div className="accounts">
           {state.pensionAccounts.map((a) => {
             const proj = s.pensionAccounts.find((x) => x.id === a.id);
@@ -239,7 +308,7 @@ function AddPensionAccount() {
         onChange={setKind}
         options={[
           { value: 'EPK', label: 'Egen pensjonskonto (EPK)' },
-          { value: 'EPK-S', label: 'EPK-S (egen sparing)' },
+          { value: 'EPK-S', label: 'EPK-S (egen pensjonskonto selvvalgt)' },
           { value: 'Fripolise', label: 'Fripolise' },
           { value: 'PKB', label: 'Pensjonskapitalbevis (PKB)' },
           { value: 'Offentlig TP', label: 'Offentlig tjenestepensjon' },

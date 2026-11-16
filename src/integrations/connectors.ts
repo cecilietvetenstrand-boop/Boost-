@@ -60,7 +60,7 @@ function demoEpk(p: Profile, provider: string, id: string, active: boolean): Pen
     balance,
     stockShare: 100,
     profile: 'livsfase',
-    fee: active ? 0.25 : 0.45,
+    fee: active ? 0.45 : 0.6,
     active,
     source: '',
   };
@@ -142,8 +142,8 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
     description:
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
-        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK, EPK-S og fripoliser, og lar deg endre aksjeandel.`,
-    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'AFP-opptjening'] : ['EPK', 'EPK-S', 'Fripoliser', 'Investeringsprofil'],
+        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser, og lar deg endre aksjeandel.`,
+    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Eget innskudd', 'Fripoliser', 'Investeringsprofil'],
     canChangeStockShare: kind === 'privat',
     canCreateAgreement: kind === 'privat',
     async fetch(p) {
@@ -167,17 +167,7 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
           ],
         };
       }
-      const epk = { ...demoEpk(p, name, `${id}-epk`, true), source: id };
-      const accounts: PensionAccount[] = [epk];
-      if (p.epkSelfRate > 0) {
-        accounts.push({
-          ...epk,
-          id: `${id}-epks`,
-          kind: 'EPK-S',
-          balance: round(p.salary * (p.epkSelfRate / 100) * 1.5),
-        });
-      }
-      return { pensionAccounts: accounts };
+      return { pensionAccounts: [{ ...demoEpk(p, name, `${id}-epk`, true), source: id }] };
     },
   };
 }

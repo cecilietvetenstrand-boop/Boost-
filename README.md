@@ -9,11 +9,11 @@ spare for å nå rundt 80 % av lønnen.
 | Fane | Innhold |
 |---|---|
 | **Oversikt** | Forventet pensjon per måned, gapet mot dagens lønn, sparebehov for å nå målet (standard 80 %), personlige forslag (nudging), pensjon ved ulike uttaksaldre og fordeling per kilde |
-| **Pensjonen min** | Folketrygden (beholdning, delingstall, garantipensjon), tjenestepensjon (innskudd/offentlig), EPK-S med skattefradrag, AFP privat/offentlig, alle pensjonskontoer og vekstgraf |
+| **Pensjonen min** | Folketrygden (beholdning, delingstall, garantipensjon), tjenestepensjon (innskudd/offentlig), EPK og EPK-S (egen pensjonskonto selvvalgt), eget innskudd med skattefradrag, AFP privat/offentlig, alle pensjonskontoer og vekstgraf |
 | **Annen sparing** | IPS, ASK, fond, aksjer, sparekonto og BSU – med egen bryter for om hver konto skal tas med i pensjonsberegningen |
 | **Spar** | Opprett spareavtale (IPS/ASK/fond) med forhåndsvisning av effekten, og endre aksjeandel/livsfaseprofil på pensjonskontoene |
 | **Koblinger** | Norsk Pensjon, NAV, pensjonsleverandører (Storebrand, DNB, Gjensidige, SpareBank 1, Nordea, KLP, SPK m.fl.) og banker via PSD2 |
-| **Lær mer** | Artikler om folketrygden, tjenestepensjon, EPK, EPK-S, AFP, IPS, spareavtale, nudging, is i magen, aksjeandel, kostnader, skatt m.m. |
+| **Lær** | Sparekalkulator, kostnadskalkulator og faktasider om nudging, is i magen, spredning, EPK, EPK-S, eget innskudd, ASK/IPS/BSU, folketrygden, tjenestepensjon, AFP m.m. |
 | **Profil** | Lønn, fødselsår, uttaksalder, pensjonsmål og forutsetninger |
 
 ## Kom i gang

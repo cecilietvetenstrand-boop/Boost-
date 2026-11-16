@@ -141,19 +141,19 @@ export function employerContribution(p: Profile): number {
   return (p.employerRate / 100) * capped + (p.employerRateAbove71G / 100) * above;
 }
 
-/** Maks tillatt EPK-S-sats: 5 % og ikke mer enn arbeidsgivers sats */
-export function maxEpksRate(p: Profile): number {
+/** Maks sats for eget innskudd i innskuddspensjonen: 5 % og ikke mer enn arbeidsgivers sats */
+export function maxSelfRate(p: Profile): number {
   if (p.tjenestepensjon !== 'innskudd') return 0;
   return Math.min(C.EPKS_MAX_RATE, p.employerRate);
 }
 
-/** Årlig egen sparing i EPK-S */
+/** Årlig eget innskudd (egen sparing i pensjonskontoen, med skattefradrag) */
 export function selfContribution(p: Profile): number {
-  const rate = Math.min(p.epkSelfRate, maxEpksRate(p));
+  const rate = Math.min(p.epkSelfRate, maxSelfRate(p));
   return (rate / 100) * Math.min(p.salary, C.OTP_SALARY_CAP_G * C.G);
 }
 
-export function epksTaxBenefit(p: Profile): number {
+export function selfContributionTaxBenefit(p: Profile): number {
   return selfContribution(p) * C.TAX_RATE_ORDINARY_INCOME;
 }
 
@@ -196,11 +196,12 @@ export interface AccountProjection {
   path: { age: number; value: number }[];
 }
 
-function projectPensionAccount(p: Profile, acc: PensionAccount, contribs: { emp: number; self: number }) {
+/** EPK og EPK-S (selvvalgt leverandør) er samme type konto og får arbeidsgiverinnskudd når de er aktive */
+export const isEpk = (a: { kind: string }) => a.kind === 'EPK' || a.kind === 'EPK-S';
+
+function projectPensionAccount(p: Profile, acc: PensionAccount, contribs: { emp: number }) {
   const age = ageOf(p);
-  let contribution = 0;
-  if (acc.active && acc.kind === 'EPK') contribution = contribs.emp;
-  if (acc.active && acc.kind === 'EPK-S') contribution = contribs.self;
+  const contribution = acc.active && isEpk(acc) ? contribs.emp : 0;
   const proj = projectBalance({
     balance: acc.balance,
     yearlyContribution: contribution,
@@ -345,12 +346,12 @@ export function calcSummary(state: AppState): PensionSummary {
   const afp = calcAfp(p);
   const offentligTp = calcOffentligTp(p, state.pensionAccounts);
 
-  const pensionAccounts = state.pensionAccounts
+  const pensionAccounts: AccountProjection[] = state.pensionAccounts
     .filter((a) => a.kind !== 'Offentlig TP')
     .map((a) => projectPensionAccount(p, a, contribs));
 
-  // Hvis brukeren har innskuddspensjon men ingen aktiv EPK registrert, legg til en beregnet konto
-  if (p.tjenestepensjon === 'innskudd' && !state.pensionAccounts.some((a) => a.kind === 'EPK' && a.active)) {
+  // Hvis brukeren har innskuddspensjon men ingen aktiv EPK/EPK-S registrert, legg til en beregnet konto
+  if (p.tjenestepensjon === 'innskudd' && !state.pensionAccounts.some((a) => isEpk(a) && a.active)) {
     pensionAccounts.push(
       projectPensionAccount(
         p,
@@ -369,24 +370,28 @@ export function calcSummary(state: AppState): PensionSummary {
       ),
     );
   }
-  if (contribs.self > 0 && !state.pensionAccounts.some((a) => a.kind === 'EPK-S' && a.active)) {
-    pensionAccounts.push(
-      projectPensionAccount(
-        p,
-        {
-          id: 'beregnet-epks',
-          kind: 'EPK-S',
-          provider: 'egen sparing (beregnet)',
-          balance: 0,
-          stockShare: 100,
-          profile: 'livsfase',
-          fee: 0.3,
-          active: true,
-          source: 'beregnet',
-        },
-        contribs,
-      ),
-    );
+  // Eget innskudd går inn i den aktive pensjonskontoen, men vises separat så effekten blir synlig
+  if (contribs.self > 0) {
+    const host = state.pensionAccounts.find((a) => isEpk(a) && a.active);
+    const proj = projectBalance({
+      balance: 0,
+      yearlyContribution: contribs.self,
+      fromAge: age,
+      toAge: p.withdrawalAge,
+      profile: host?.profile ?? 'livsfase',
+      stockShare: host?.stockShare ?? 100,
+      fee: host?.fee ?? 0.3,
+    });
+    pensionAccounts.push({
+      id: 'eget-innskudd',
+      label: 'Eget innskudd i pensjonskontoen',
+      kind: 'Eget innskudd',
+      balanceNow: 0,
+      balanceAtWithdrawal: proj.final,
+      yearlyContribution: contribs.self,
+      yearlyPayout: annuity(proj.final, payoutYears(p.withdrawalAge), p.payoutReturn / 100),
+      path: proj.path,
+    });
   }
 
   const savings = state.savings.filter((s) => s.includeInPension).map((s) => projectSavings(p, s));
@@ -400,11 +405,11 @@ export function calcSummary(state: AppState): PensionSummary {
     { key: 'offentligTp', label: 'Offentlig tjenestepensjon', yearly: offentligTp.yearly, lifelong: true },
     {
       key: 'epk',
-      label: 'Tjenestepensjon (EPK, fripoliser, PKB)',
-      yearly: sum(pensionAccounts, (a) => a.kind !== 'EPK-S'),
+      label: 'Tjenestepensjon (EPK/EPK-S, fripoliser, PKB)',
+      yearly: sum(pensionAccounts, (a) => a.kind !== 'Eget innskudd'),
       lifelong: false,
     },
-    { key: 'epks', label: 'EPK-S (egen sparing)', yearly: sum(pensionAccounts, (a) => a.kind === 'EPK-S'), lifelong: false },
+    { key: 'egen', label: 'Eget innskudd i pensjonskontoen', yearly: sum(pensionAccounts, (a) => a.kind === 'Eget innskudd'), lifelong: false },
     { key: 'savings', label: 'Annen sparing', yearly: sum(savings, () => true), lifelong: false },
   ].filter((s) => s.yearly > 0.5);
 
