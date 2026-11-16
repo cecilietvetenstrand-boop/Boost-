@@ -150,7 +150,7 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
     provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
     // Aksjeandel kan bare endres fra appen hos Boost
     canChangeStockShare: id === 'boost-liv',
-    // Spareavtaler opprettes bare hos Boost
+    // Spareavtaler (fondskonto og IPS) opprettes bare hos Boost
     canCreateAgreement: id === 'boost-liv',
     async fetch(p) {
       await delay(800);
@@ -192,11 +192,11 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
     name,
     category: 'bank',
     auth: 'PSD2 (BankID)',
-    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-boost' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
+    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.`,
     provides: products,
     canChangeStockShare: false,
-    // Spareavtaler opprettes bare hos Boost Bank
-    canCreateAgreement: id === 'bank-boost',
+    // Spareavtaler i banken (ASK, VPS) kommer senere
+    canCreateAgreement: false,
     async fetch(p) {
       await delay(800);
       const rnd = seeded(name + p.salary);

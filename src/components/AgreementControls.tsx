@@ -7,8 +7,8 @@ import { IPS_MAX_YEARLY } from '../lib/constants';
 import { requestSavingsAgreement } from '../integrations/connectors';
 import type { SavingsAccount } from '../lib/types';
 
-/** Leverandører der spareavtaler kan opprettes og endres fra appen */
-export const MANAGED_PROVIDERS = ['Boost Bank', 'Boost'];
+/** Spareavtaler kan bare opprettes og endres fra appen i Boosts egne produkter (fondskonto og IPS) */
+export const MANAGED_PROVIDERS = ['Boost'];
 
 const STATUS_LABEL = { aktiv: 'Aktiv', pause: 'På pause', stoppet: 'Stoppet' } as const;
 const STATUS_TONE = { aktiv: 'good', pause: 'warn', stoppet: 'neutral' } as const;

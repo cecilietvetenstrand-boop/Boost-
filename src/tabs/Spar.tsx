@@ -13,7 +13,6 @@ import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/type
 const PRODUCTS: { value: SavingsType; label: string; info: string }[] = [
   { value: 'Fond', label: 'Fondskonto', info: 'Spar fast i ett eller flere fond. Du kan ta ut pengene når du vil.' },
   { value: 'IPS', label: 'IPS', info: `Pensjonssparing med 22 % skattefradrag. Maks ${kr(IPS_MAX_YEARLY)} i året, bundet til 62 år.` },
-  { value: 'ASK', label: 'Aksjesparekonto', info: 'Fond og aksjer uten skatt underveis. Skatt først når gevinsten tas ut.' },
 ];
 
 export function Spar() {
@@ -104,8 +103,8 @@ function NyttSparing() {
     [state, product, effectiveMonthly, stockShare, fee],
   );
 
-  // Spareavtaler kan bare opprettes hos Boost (fondskonto og ASK) og Boost (IPS)
-  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'boost-liv' : 'bank-boost'));
+  // Spareavtaler kan bare opprettes i Boosts egne produkter: fondskonto og IPS
+  const provider = CONNECTORS.find((c) => c.id === 'boost-liv');
   const confirm = async () => {
     if (!provider) return;
     setBusy(true);
@@ -114,7 +113,7 @@ function NyttSparing() {
       type: 'upsertSavings',
       account: {
         id: uid(),
-        name: product === 'IPS' ? `IPS – ${provider.name}` : `${product === 'ASK' ? 'Aksjesparekonto' : 'Fondskonto'} – ${fund.name}`,
+        name: product === 'IPS' ? `IPS – ${provider.name}` : `Fondskonto – ${fund.name}`,
         type: product,
         provider: provider.name,
         balance: 0,
@@ -176,7 +175,7 @@ function NyttSparing() {
       )}
       <p className="provider-line">
         Spareavtalen opprettes hos <strong>{provider?.name}</strong>
-        {product === 'IPS' ? ' – IPS tilbys gjennom Boost.' : ' – fond og aksjesparekonto tilbys gjennom Boost Bank.'}
+        {' '}– fondskonto og IPS er Boosts egne produkter. Aksjesparekonto og VPS i Boost Bank kommer senere.
       </p>
 
       <NumberField label="Beløp per måned" value={monthly} onChange={setMonthly} suffix="kr" step={100} min={100} />
@@ -194,7 +193,7 @@ function NyttSparing() {
       </div>
       {product === 'IPS' && monthly > ipsCapMonthly && (
         <Callout tone="warn">
-          IPS har et tak på {kr(IPS_MAX_YEARLY)} i året ({kr(ipsCapMonthly)}/mnd). Resten bør spares i f.eks. ASK – opprett gjerne to avtaler.
+          IPS har et tak på {kr(IPS_MAX_YEARLY)} i året ({kr(ipsCapMonthly)}/mnd). Resten kan spares i fondskonto – opprett gjerne to avtaler.
         </Callout>
       )}
 

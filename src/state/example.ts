@@ -68,7 +68,7 @@ export const exampleState: AppState = {
       name: 'Fondskonto – Boost Global Indeks',
       type: 'Fond',
       fund: 'Boost Global Indeks',
-      provider: 'Boost Bank',
+      provider: 'Boost',
       balance: 72_000,
       monthly: 1_000,
       stockShare: 100,
