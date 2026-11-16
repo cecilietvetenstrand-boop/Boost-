@@ -71,8 +71,12 @@ function Shell() {
         {state.isExample && (
           <div className="example-banner" role="note">
             <div>
-              <strong>Du ser et eksempel.</strong> Ingrid er 42 år, tjener {kr(state.profile.salary)} og har pensjon fra NAV og
-              arbeidsgiver, IPS, aksjesparekonto, fond, VPS og sparekonto. Slå på frie midler under «Sparing» for å ta dem med. Tallene er oppdiktede.
+              <strong>Du ser et eksempel.</strong>{' '}
+              <span className="hide-mobile">
+                Ingrid er 42 år, tjener {kr(state.profile.salary)} og har pensjon fra NAV og arbeidsgiver, IPS, aksjesparekonto, fond, VPS og
+                sparekonto. Slå på frie midler under «Sparing» for å ta dem med.{' '}
+              </span>
+              Tallene er oppdiktede.
             </div>
             <div className="row">
               <button className="btn btn-primary btn-small" onClick={() => { dispatch({ type: 'reset' }); go('profil'); }}>

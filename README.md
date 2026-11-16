@@ -25,6 +25,15 @@ npm test         # tester for beregningsmotoren
 npm run build    # produksjonsbygg i dist/
 ```
 
+## Publisering og installasjon som app
+
+Appen publiseres automatisk til GitHub Pages ved hver push (`.github/workflows/deploy.yml`).
+
+1. Gå til **Settings → Pages** i repoet og velg **Source: GitHub Actions** (én gang).
+2. Etter neste push ligger appen på `https://<brukernavn>.github.io/<repo>/`.
+3. Åpne adressen på mobilen og velg **Legg til på Hjem-skjerm** (iPhone/Safari) eller **Installer app** (Android/Chrome).
+   Appen får eget ikon, åpnes i fullskjerm og fungerer offline etter første besøk.
+
 ## Struktur
 
 ```
