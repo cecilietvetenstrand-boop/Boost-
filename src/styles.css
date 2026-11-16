@@ -513,3 +513,4 @@ body { overflow-x: clip; }
 .fund .muted { font-size: 0.8rem; }
 .fund-group { display: grid; gap: 8px; }
 .fund-cat { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 6px; }
+.provider-line { margin: 4px 0 12px; font-size: 0.9rem; color: var(--text-secondary); }

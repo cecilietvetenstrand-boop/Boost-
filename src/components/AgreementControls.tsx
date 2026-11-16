@@ -7,6 +7,9 @@ import { IPS_MAX_YEARLY } from '../lib/constants';
 import { requestSavingsAgreement } from '../integrations/connectors';
 import type { SavingsAccount } from '../lib/types';
 
+/** Leverandører der spareavtaler kan opprettes og endres fra appen */
+export const MANAGED_PROVIDERS = ['Nordea', 'Nordea Liv'];
+
 const STATUS_LABEL = { aktiv: 'Aktiv', pause: 'På pause', stoppet: 'Stoppet' } as const;
 const STATUS_TONE = { aktiv: 'good', pause: 'warn', stoppet: 'neutral' } as const;
 
@@ -34,6 +37,23 @@ export function AgreementControls({ acc }: { acc: SavingsAccount }) {
   );
 
   if (!agreement) return null;
+
+  // Spareavtaler kan bare endres fra appen hos Nordea og Nordea Liv
+  if (!MANAGED_PROVIDERS.includes(acc.provider)) {
+    return (
+      <div className="agreement">
+        <div className="agreement-head">
+          <span>
+            Spareavtale: <strong>{kr(acc.monthly)}/mnd</strong> den {agreement.dayOfMonth}. hver måned
+          </span>
+          <Badge tone={STATUS_TONE[agreement.status]}>{STATUS_LABEL[agreement.status]}</Badge>
+        </div>
+        <p className="fineprint" style={{ margin: 0 }}>
+          Avtalen er hos {acc.provider}. Endre, sett på pause eller stopp den i {acc.provider} sin app eller nettbank.
+        </p>
+      </div>
+    );
+  }
 
   const update = (patch: Partial<SavingsAccount>, text: string) => {
     dispatch({ type: 'upsertSavings', account: { ...acc, ...patch } });

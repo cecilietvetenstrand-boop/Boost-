@@ -149,7 +149,8 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
         : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser, og lar deg endre aksjeandel.`,
     provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
     canChangeStockShare: kind === 'privat',
-    canCreateAgreement: kind === 'privat',
+    // Spareavtaler opprettes bare hos Nordea Liv
+    canCreateAgreement: id === 'nordea-liv',
     async fetch(p) {
       await delay(800);
       if (kind === 'offentlig') {
@@ -190,10 +191,11 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
     name,
     category: 'bank',
     auth: 'PSD2 (BankID)',
-    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}. Du kan opprette spareavtaler direkte.`,
+    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-nordea' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
     provides: products,
     canChangeStockShare: false,
-    canCreateAgreement: true,
+    // Spareavtaler opprettes bare hos Nordea
+    canCreateAgreement: id === 'bank-nordea',
     async fetch(p) {
       await delay(800);
       const rnd = seeded(name + p.salary);

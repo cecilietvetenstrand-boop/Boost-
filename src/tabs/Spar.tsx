@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
-import { Badge, Callout, Card, NumberField, Select, Slider, Stat, Toggle } from '../components/ui';
+import { Badge, Callout, Card, NumberField, Slider, Stat, Toggle } from '../components/ui';
 import { kr, pct, uid } from '../lib/format';
 import { activeMonthly, calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
 import { AgreementControls } from '../components/AgreementControls';
@@ -65,16 +65,8 @@ function NyttSparing() {
   const p = state.profile;
   const needed = Number.isFinite(s.target.monthlyNeeded) ? Math.ceil(s.target.monthlyNeeded / 100) * 100 : 0;
 
-  const banks = useMemo(() => {
-    const connected = new Set(state.connections.map((c) => c.connectorId));
-    return CONNECTORS.filter((c) => c.canCreateAgreement).sort(
-      (a, b) => Number(connected.has(b.id)) - Number(connected.has(a.id)),
-    );
-  }, [state.connections]);
-
   const [product, setProduct] = useState<SavingsType>('Fond');
   const [fundName, setFundName] = useState(FUNDS[0].name);
-  const [providerId, setProviderId] = useState('bank-nordea');
   const [monthly, setMonthly] = useState(needed > 0 ? Math.min(needed, 1250) : 1000);
   const [ipsShare, setIpsShare] = useState(s.yearsToWithdrawal > 10 ? 100 : 50);
   const fund = FUNDS.find((f) => f.name === fundName) ?? FUNDS[0];
@@ -112,7 +104,8 @@ function NyttSparing() {
     [state, product, effectiveMonthly, stockShare, fee],
   );
 
-  const provider = banks.find((b) => b.id === providerId);
+  // Spareavtaler kan bare opprettes hos Nordea (fondskonto og ASK) og Nordea Liv (IPS)
+  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'nordea-liv' : 'bank-nordea'));
   const confirm = async () => {
     if (!provider) return;
     setBusy(true);
@@ -149,7 +142,7 @@ function NyttSparing() {
       <span className="field-label">Hva vil du spare i?</span>
       <div className="product-cards" role="radiogroup" aria-label="Spareprodukt">
         {PRODUCTS.map((x) => (
-          <button key={x.value} role="radio" aria-checked={product === x.value} className={`product-card ${product === x.value ? 'on' : ''}`} onClick={() => { setProduct(x.value); setProviderId(x.value === 'IPS' ? 'nordea-liv' : 'bank-nordea'); }}>
+          <button key={x.value} role="radio" aria-checked={product === x.value} className={`product-card ${product === x.value ? 'on' : ''}`} onClick={() => setProduct(x.value)}>
             <strong>{x.label}</strong>
             <span className="muted">{x.info}</span>
           </button>
@@ -182,17 +175,10 @@ function NyttSparing() {
           </p>
         </>
       )}
-      <div className="grid2">
-        <Select
-          label="Hos hvem?"
-          value={providerId}
-          onChange={setProviderId}
-          options={banks.map((b) => ({
-            value: b.id,
-            label: `${b.name}${state.connections.some((c) => c.connectorId === b.id) ? ' (koblet til)' : ''}`,
-          }))}
-        />
-      </div>
+      <p className="provider-line">
+        Spareavtalen opprettes hos <strong>{provider?.name}</strong>
+        {product === 'IPS' ? ' – IPS tilbys gjennom Nordea Liv.' : ' – fond og aksjesparekonto tilbys gjennom Nordea.'}
+      </p>
 
       <NumberField label="Beløp per måned" value={monthly} onChange={setMonthly} suffix="kr" step={100} min={100} />
       <div className="chips">
