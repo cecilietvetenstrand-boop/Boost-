@@ -1,6 +1,6 @@
 // Personlige "dytt" (nudges): små, konkrete forslag basert på brukerens egne tall.
 import type { AppState } from './types';
-import { activeMonthly, calcSummary, type PensionSummary } from './calc';
+import { activeMonthly, calcSummary, canChangeStockShare, type PensionSummary } from './calc';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from './constants';
 import { kr } from './format';
 
@@ -52,13 +52,23 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
   const lowShare = state.pensionAccounts.filter(
     (a) => a.profile === 'fast' && a.stockShare < 60 && s.yearsToWithdrawal > 15 && a.kind !== 'Offentlig TP',
   );
-  if (lowShare.length) {
+  const lowNordea = lowShare.filter((a) => canChangeStockShare(a));
+  const lowOther = lowShare.filter((a) => !canChangeStockShare(a));
+  if (lowNordea.length) {
     out.push({
       id: 'stocks',
       tone: 'warn',
       title: 'Lav aksjeandel med lang tid igjen',
-      text: `${lowShare.length} pensjonskonto(er) har under 60 % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Over lang tid gir aksjer normalt mer pensjon.`,
+      text: `${lowNordea.length} pensjonskonto(er) hos Nordea Liv har under 60 % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Over lang tid gir aksjer normalt mer pensjon.`,
       action: { label: 'Endre aksjeandel', tab: 'spar' },
+    });
+  } else if (lowOther.length) {
+    out.push({
+      id: 'stocks-other',
+      tone: 'info',
+      title: 'Lav aksjeandel hos et annet selskap',
+      text: `Pensjonen din hos ${lowOther[0].provider} har ${lowOther[0].stockShare} % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Du kan endre den hos ${lowOther[0].provider}, eller samle pensjonen hos Nordea Liv og velge aksjeandel selv.`,
+      action: { label: 'Se kontoene', tab: 'pensjon' },
     });
   }
 

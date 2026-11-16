@@ -145,3 +145,12 @@ describe('spareavtaler', () => {
     expect(activeMonthly({ ...base, agreement: { ...ag, status: 'stoppet' } })).toBe(0);
   });
 });
+
+describe('endring av aksjeandel', () => {
+  it('er bare mulig hos Nordea Liv', async () => {
+    const { canChangeStockShare } = await import('./calc');
+    expect(canChangeStockShare({ provider: 'Nordea Liv', kind: 'EPK' })).toBe(true);
+    expect(canChangeStockShare({ provider: 'DNB Livsforsikring', kind: 'PKB' })).toBe(false);
+    expect(canChangeStockShare({ provider: 'Storebrand', kind: 'EPK' })).toBe(false);
+  });
+});

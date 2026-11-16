@@ -3,7 +3,7 @@ import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, TextField } from '../components/ui';
 import { GrowthChart, SOURCE_COLOR, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct, uid } from '../lib/format';
-import { activeMonthly, calcSummary, feeSplit, isEpk, summaryByWithdrawalAge } from '../lib/calc';
+import { activeMonthly, calcSummary, canChangeStockShare, feeSplit, isEpk, summaryByWithdrawalAge } from '../lib/calc';
 import { G, IPS_MAX_YEARLY, MAX_WITHDRAWAL_AGE, TAX_RATE_ORDINARY_INCOME, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
 import type { PensionAccount, PensionKind } from '../lib/types';
 import type { TabId } from '../lib/nudges';
@@ -404,8 +404,10 @@ function PensionAccountCard({ account: a, go }: { account: PensionAccount; go: (
         </div>
       )}
       <div className="row">
-        {a.kind !== 'Offentlig TP' && (
+        {canChangeStockShare(a) ? (
           <button className="btn btn-small" onClick={() => go('spar')}>Endre aksjeandel</button>
+        ) : (
+          a.kind !== 'Offentlig TP' && <span className="fineprint">Aksjeandelen endres hos {a.provider}</span>
         )}
         <button className="btn btn-ghost btn-small" onClick={() => setOpen(!open)}>{open ? 'Ferdig' : 'Endre kostnader'}</button>
         {(a.source === 'manuell' || a.source === 'eksempel') && (

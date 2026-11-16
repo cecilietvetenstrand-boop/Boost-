@@ -146,9 +146,10 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
     description:
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
-        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser, og lar deg endre aksjeandel.`,
+        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser${id === 'nordea-liv' ? ', og lar deg endre aksjeandel' : ''}.`,
     provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
-    canChangeStockShare: kind === 'privat',
+    // Aksjeandel kan bare endres fra appen hos Nordea Liv
+    canChangeStockShare: id === 'nordea-liv',
     // Spareavtaler opprettes bare hos Nordea Liv
     canCreateAgreement: id === 'nordea-liv',
     async fetch(p) {

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Slider, Stat, Toggle } from '../components/ui';
 import { kr, pct, uid } from '../lib/format';
-import { activeMonthly, calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
+import { activeMonthly, calcSummary, canChangeStockShare, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
 import { AgreementControls } from '../components/AgreementControls';
 import { LIFECYCLE_END_AGE, LIFECYCLE_END_SHARE, LIFECYCLE_START_AGE, LIFECYCLE_START_SHARE } from '../lib/constants';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
@@ -234,7 +234,8 @@ function NyttSparing() {
 
 function Aksjeandel() {
   const { state, summary: s } = useStore();
-  const accounts = state.pensionAccounts.filter((a) => a.kind !== 'Offentlig TP');
+  const accounts = state.pensionAccounts.filter((a) => canChangeStockShare(a));
+  const others = state.pensionAccounts.filter((a) => a.kind !== 'Offentlig TP' && !canChangeStockShare(a));
 
   return (
     <Card title="Endre aksjeandel på pensjonen" subtitle="Mer aksjer gir høyere forventet pensjon, men større svingninger underveis">
@@ -243,12 +244,30 @@ function Aksjeandel() {
         men bare for dem som ble sittende. Har du mer enn 10–15 år igjen, er høy aksjeandel vanligvis et godt valg.
       </Callout>
       {accounts.length === 0 ? (
-        <p className="muted">Koble til pensjonsleverandøren din eller Norsk Pensjon for å se og endre aksjeandelen på kontoene dine.</p>
+        <p className="muted">Du har ingen pensjonskontoer hos Nordea Liv ennå. Aksjeandelen kan bare endres her for kontoer hos Nordea Liv.</p>
       ) : (
         <div className="accounts">
           {accounts.map((a) => (
             <StockShareEditor key={a.id} account={a} currentTotal={s.totalYearly} />
           ))}
+        </div>
+      )}
+      {others.length > 0 && (
+        <div className="ins-group">
+          <h3 className="ins-group-title">Hos andre selskaper</h3>
+          <div className="ins-list">
+            {others.map((a) => (
+              <article key={a.id} className="ins-row">
+                <div className="ins-main">
+                  <strong>{a.kind} · {a.provider}</strong>
+                  <span className="muted">
+                    {a.profile === 'livsfase' ? 'Livsfaseprofil' : `${a.stockShare} % aksjer`} · saldo {kr(a.balance)}. Aksjeandelen endres hos {a.provider}, eller ved å flytte
+                    pensjonen til Nordea Liv.
+                  </span>
+                </div>
+              </article>
+            ))}
+          </div>
         </div>
       )}
     </Card>
