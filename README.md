@@ -13,7 +13,7 @@ spare for å nå rundt 80 % av lønnen.
 | **Forsikring** | Inntekt hvis du blir ufør (NAV + uførepensjon fra arbeidsgiver, innskuddsfritak, barnetillegg), og personforsikringer fra arbeidsgiver og privat |
 | **Annen sparing** | IPS, ASK, fond, aksjer, sparekonto og BSU – med egen bryter for om hver konto skal tas med i pensjonsberegningen |
 | **Spar** | Opprett spareavtale (IPS/ASK/fond) med forhåndsvisning av effekten, og endre aksjeandel/livsfaseprofil på pensjonskontoene |
-| **Koblinger** | Norsk Pensjon, NAV, pensjonsleverandører (Storebrand, DNB, Gjensidige, SpareBank 1, Nordea, KLP, SPK m.fl.) og banker via PSD2 |
+| **Koblinger** | Norsk Pensjon, NAV, pensjonsleverandører og offentlige pensjonskasser (oppdiktede demo-navn) og banker via PSD2 |
 | **Lær** | Sparekalkulator, kostnadskalkulator og faktasider om nudging, is i magen, spredning, EPK, EPK-S, ASK/IPS/BSU, folketrygden, tjenestepensjon, AFP m.m. |
 | **Profil** | Lønn, fødselsår, uttaksalder, pensjonsmål og forutsetninger |
 
@@ -48,6 +48,8 @@ src/
 ```
 
 ## Viktig
+
+- Alle selskaps- og fondsnavn i appen (Fjelltopp Liv, Fjelltopp Bank, Havbris Pensjon osv.) er **oppdiktede demo-navn**.
 
 - **Koblingene er i demo-modus** og returnerer testdata. Se [docs/INTEGRASJONER.md](docs/INTEGRASJONER.md) for hva som
   kreves for ekte integrasjoner.

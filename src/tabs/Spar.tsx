@@ -7,7 +7,7 @@ import { AgreementControls } from '../components/AgreementControls';
 import { LIFECYCLE_END_AGE, LIFECYCLE_END_SHARE, LIFECYCLE_START_AGE, LIFECYCLE_START_SHARE } from '../lib/constants';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from '../lib/constants';
-import { FUNDS, FUND_CATEGORIES, FUNDS_SOURCE } from '../lib/funds';
+import { FUNDS, FUND_CATEGORIES } from '../lib/funds';
 import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/types';
 
 const PRODUCTS: { value: SavingsType; label: string; info: string }[] = [
@@ -104,8 +104,8 @@ function NyttSparing() {
     [state, product, effectiveMonthly, stockShare, fee],
   );
 
-  // Spareavtaler kan bare opprettes hos Nordea (fondskonto og ASK) og Nordea Liv (IPS)
-  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'nordea-liv' : 'bank-nordea'));
+  // Spareavtaler kan bare opprettes hos Fjelltopp (fondskonto og ASK) og Fjelltopp Liv (IPS)
+  const provider = CONNECTORS.find((c) => c.id === (product === 'IPS' ? 'fjelltopp-liv' : 'bank-fjelltopp'));
   const confirm = async () => {
     if (!provider) return;
     setBusy(true);
@@ -169,15 +169,14 @@ function NyttSparing() {
             ))}
           </div>
           <p className="fineprint">
-            Fondene er hentet fra <a href={FUNDS_SOURCE.url} target="_blank" rel="noreferrer">{FUNDS_SOURCE.label}</a> {FUNDS_SOURCE.date}. Se fondets
-            faktiske kostnad og risiko i Nordeas fondsliste før du velger. Beregningen bruker et anslag på {fund.assumedFee.toLocaleString('nb-NO')} % i
+            Fondene er eksempler med oppdiktede navn. Se fondets faktiske kostnad og risiko i fondslisten før du velger. Beregningen bruker et anslag på {fund.assumedFee.toLocaleString('nb-NO')} % i
             årlig kostnad for dette fondet.
           </p>
         </>
       )}
       <p className="provider-line">
         Spareavtalen opprettes hos <strong>{provider?.name}</strong>
-        {product === 'IPS' ? ' – IPS tilbys gjennom Nordea Liv.' : ' – fond og aksjesparekonto tilbys gjennom Nordea.'}
+        {product === 'IPS' ? ' – IPS tilbys gjennom Fjelltopp Liv.' : ' – fond og aksjesparekonto tilbys gjennom Fjelltopp Bank.'}
       </p>
 
       <NumberField label="Beløp per måned" value={monthly} onChange={setMonthly} suffix="kr" step={100} min={100} />
@@ -244,7 +243,7 @@ function Aksjeandel() {
         men bare for dem som ble sittende. Har du mer enn 10–15 år igjen, er høy aksjeandel vanligvis et godt valg.
       </Callout>
       {accounts.length === 0 ? (
-        <p className="muted">Du har ingen pensjonskontoer hos Nordea Liv ennå. Aksjeandelen kan bare endres her for kontoer hos Nordea Liv.</p>
+        <p className="muted">Du har ingen pensjonskontoer hos Fjelltopp Liv ennå. Aksjeandelen kan bare endres her for kontoer hos Fjelltopp Liv.</p>
       ) : (
         <div className="accounts">
           {accounts.map((a) => (
@@ -262,7 +261,7 @@ function Aksjeandel() {
                   <strong>{a.kind} · {a.provider}</strong>
                   <span className="muted">
                     {a.profile === 'livsfase' ? 'Livsfaseprofil' : `${a.stockShare} % aksjer`} · saldo {kr(a.balance)}. Aksjeandelen endres hos {a.provider}, eller ved å flytte
-                    pensjonen til Nordea Liv.
+                    pensjonen til Fjelltopp Liv.
                   </span>
                 </div>
               </article>

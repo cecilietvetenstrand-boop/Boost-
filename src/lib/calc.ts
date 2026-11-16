@@ -183,8 +183,8 @@ export interface AccountProjection {
 /** EPK og EPK-S (selvvalgt leverandør) er samme type konto og får arbeidsgiverinnskudd når de er aktive */
 export const isEpk = (a: { kind: string }) => a.kind === 'EPK' || a.kind === 'EPK-S';
 
-/** Aksjeandel kan bare endres fra appen for kontoer hos Nordea Liv */
-export const canChangeStockShare = (a: { provider: string; kind: string }) => a.provider === 'Nordea Liv' && a.kind !== 'Offentlig TP';
+/** Aksjeandel kan bare endres fra appen for kontoer hos Fjelltopp Liv */
+export const canChangeStockShare = (a: { provider: string; kind: string }) => a.provider === 'Fjelltopp Liv' && a.kind !== 'Offentlig TP';
 
 /**
  * Hvem betaler forvaltningen?

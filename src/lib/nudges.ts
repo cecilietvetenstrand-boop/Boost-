@@ -52,14 +52,14 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
   const lowShare = state.pensionAccounts.filter(
     (a) => a.profile === 'fast' && a.stockShare < 60 && s.yearsToWithdrawal > 15 && a.kind !== 'Offentlig TP',
   );
-  const lowNordea = lowShare.filter((a) => canChangeStockShare(a));
+  const lowFjelltopp = lowShare.filter((a) => canChangeStockShare(a));
   const lowOther = lowShare.filter((a) => !canChangeStockShare(a));
-  if (lowNordea.length) {
+  if (lowFjelltopp.length) {
     out.push({
       id: 'stocks',
       tone: 'warn',
       title: 'Lav aksjeandel med lang tid igjen',
-      text: `${lowNordea.length} pensjonskonto(er) hos Nordea Liv har under 60 % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Over lang tid gir aksjer normalt mer pensjon.`,
+      text: `${lowFjelltopp.length} pensjonskonto(er) hos Fjelltopp Liv har under 60 % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Over lang tid gir aksjer normalt mer pensjon.`,
       action: { label: 'Endre aksjeandel', tab: 'spar' },
     });
   } else if (lowOther.length) {
@@ -67,7 +67,7 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
       id: 'stocks-other',
       tone: 'info',
       title: 'Lav aksjeandel hos et annet selskap',
-      text: `Pensjonen din hos ${lowOther[0].provider} har ${lowOther[0].stockShare} % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Du kan endre den hos ${lowOther[0].provider}, eller samle pensjonen hos Nordea Liv og velge aksjeandel selv.`,
+      text: `Pensjonen din hos ${lowOther[0].provider} har ${lowOther[0].stockShare} % aksjer, selv om du har ${s.yearsToWithdrawal} år til pensjon. Du kan endre den hos ${lowOther[0].provider}, eller samle pensjonen hos Fjelltopp Liv og velge aksjeandel selv.`,
       action: { label: 'Se kontoene', tab: 'pensjon' },
     });
   }

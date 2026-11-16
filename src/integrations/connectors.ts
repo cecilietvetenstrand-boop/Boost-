@@ -83,12 +83,12 @@ const norskPensjon: Connector = {
   async fetch(p) {
     await delay(900);
     const accounts: PensionAccount[] = [
-      { ...demoEpk(p, 'Nordea Liv', 'np-epk-1', true), source: this.id },
-      { ...demoEpk(p, 'DNB Livsforsikring', 'np-epk-2', false), source: this.id },
+      { ...demoEpk(p, 'Fjelltopp Liv', 'np-epk-1', true), source: this.id },
+      { ...demoEpk(p, 'Kystlys Livsforsikring', 'np-epk-2', false), source: this.id },
       {
         id: 'np-fripolise-1',
         kind: 'Fripolise',
-        provider: 'Gjensidige Pensjon',
+        provider: 'Trygghavn Pensjon',
         employer: 'Tidligere arbeidsgiver',
         balance: round(p.salary * 0.12),
         stockShare: 0,
@@ -103,7 +103,7 @@ const norskPensjon: Connector = {
         id: 'np-ips-1',
         name: 'IPS',
         type: 'IPS',
-        provider: 'Nordnet',
+        provider: 'Nettmegleren',
         balance: round(15_000 * Math.max(1, Math.min(6, age(p) - 40))),
         monthly: 1250,
         stockShare: 100,
@@ -146,12 +146,12 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
     description:
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
-        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser${id === 'nordea-liv' ? ', og lar deg endre aksjeandel' : ''}.`,
+        : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser${id === 'fjelltopp-liv' ? ', og lar deg endre aksjeandel' : ''}.`,
     provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'Uførepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Uføredekning', 'Gruppeliv', 'Investeringsprofil'],
-    // Aksjeandel kan bare endres fra appen hos Nordea Liv
-    canChangeStockShare: id === 'nordea-liv',
-    // Spareavtaler opprettes bare hos Nordea Liv
-    canCreateAgreement: id === 'nordea-liv',
+    // Aksjeandel kan bare endres fra appen hos Fjelltopp Liv
+    canChangeStockShare: id === 'fjelltopp-liv',
+    // Spareavtaler opprettes bare hos Fjelltopp Liv
+    canCreateAgreement: id === 'fjelltopp-liv',
     async fetch(p) {
       await delay(800);
       if (kind === 'offentlig') {
@@ -192,11 +192,11 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
     name,
     category: 'bank',
     auth: 'PSD2 (BankID)',
-    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-nordea' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
+    description: `Henter sparekontoer, fond og aksjesparekonto fra ${name}.${id === 'bank-fjelltopp' ? ' Du kan opprette spareavtaler direkte.' : ''}`,
     provides: products,
     canChangeStockShare: false,
-    // Spareavtaler opprettes bare hos Nordea
-    canCreateAgreement: id === 'bank-nordea',
+    // Spareavtaler opprettes bare hos Fjelltopp Bank
+    canCreateAgreement: id === 'bank-fjelltopp',
     async fetch(p) {
       await delay(800);
       const rnd = seeded(name + p.salary);
@@ -228,21 +228,21 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
 export const CONNECTORS: Connector[] = [
   norskPensjon,
   nav,
-  provider('nordea-liv', 'Nordea Liv'),
-  provider('storebrand', 'Storebrand'),
-  provider('dnb-liv', 'DNB Livsforsikring'),
-  provider('gjensidige-pensjon', 'Gjensidige Pensjon'),
-  provider('sb1-forsikring', 'SpareBank 1 Forsikring'),
-  provider('if-pensjon', 'Tryg / If Pensjon'),
-  provider('klp', 'KLP', 'offentlig'),
-  provider('spk', 'Statens pensjonskasse', 'offentlig'),
-  bank('bank-dnb', 'DNB', ['Sparekonto', 'BSU', 'Fond']),
-  bank('bank-nordea', 'Nordea', ['Sparekonto', 'Fond']),
-  bank('bank-sb1', 'SpareBank 1', ['Sparekonto', 'BSU', 'ASK']),
-  bank('bank-danske', 'Danske Bank', ['Sparekonto', 'Fond']),
-  bank('bank-handelsbanken', 'Handelsbanken', ['Sparekonto', 'Fond']),
-  bank('bank-nordnet', 'Nordnet', ['ASK', 'Aksjer']),
-  bank('bank-kron', 'Kron', ['ASK']),
+  provider('fjelltopp-liv', 'Fjelltopp Liv'),
+  provider('havbris', 'Havbris Pensjon'),
+  provider('kystlys-liv', 'Kystlys Livsforsikring'),
+  provider('trygghavn-pensjon', 'Trygghavn Pensjon'),
+  provider('bygdekraft-forsikring', 'Bygdekraft Forsikring'),
+  provider('vernestad-pensjon', 'Vernestad Pensjon'),
+  provider('kommunal-pk', 'Kommunal Pensjonskasse', 'offentlig'),
+  provider('statlig-pk', 'Statlig Pensjonskasse', 'offentlig'),
+  bank('bank-kystlys', 'Kystlys Bank', ['Sparekonto', 'BSU', 'Fond']),
+  bank('bank-fjelltopp', 'Fjelltopp Bank', ['Sparekonto', 'Fond']),
+  bank('bank-bygdekraft', 'Bygdekraft Sparebank', ['Sparekonto', 'BSU', 'ASK']),
+  bank('bank-sundvik', 'Sundvik Bank', ['Sparekonto', 'Fond']),
+  bank('bank-torgvik', 'Torgvik Bank', ['Sparekonto', 'Fond']),
+  bank('bank-nettmegleren', 'Nettmegleren', ['ASK', 'Aksjer']),
+  bank('bank-sparekroken', 'Sparekroken', ['ASK']),
 ];
 
 export const connectorById = (id: string) => CONNECTORS.find((c) => c.id === id);

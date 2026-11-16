@@ -105,7 +105,7 @@ export function Forsikring({ go }: { go: (t: TabId) => void }) {
               <NumberField label="Av lønn over 6 G" suffix="%" step={1} value={d.percentAbove6G} onChange={(v) => setD({ percentAbove6G: Math.max(0, v) })} help="Den delen NAV ikke dekker" />
               <NumberField label="Barnetillegg per barn" suffix="G" step={0.05} value={d.childSupplementG} onChange={(v) => setD({ childSupplementG: Math.max(0, v) })} />
               <NumberField label="Antall barn under 21" step={1} value={d.children} onChange={(v) => setD({ children: Math.max(0, Math.round(v)) })} />
-              <TextField label="Leverandør" value={d.provider} onChange={(v) => setD({ provider: v })} placeholder="F.eks. Nordea Liv" />
+              <TextField label="Leverandør" value={d.provider} onChange={(v) => setD({ provider: v })} placeholder="F.eks. Fjelltopp Liv" />
             </div>
             <Toggle checked={d.premiumWaiver} onChange={(v) => setD({ premiumWaiver: v })} label="Innskuddsfritak ved uførhet" />
             {d.premiumWaiver && u.premiumWaiverYearly > 0 && (
@@ -210,7 +210,7 @@ function AddInsurance() {
   return (
     <div className="form-inline">
       <Select label="Type" value={type} onChange={setType} options={TYPES} />
-      <TextField label="Selskap" value={provider} onChange={setProvider} placeholder="F.eks. Gjensidige" />
+      <TextField label="Selskap" value={provider} onChange={setProvider} placeholder="F.eks. Trygghavn Forsikring" />
       <Select
         label="Betales av"
         value={source}

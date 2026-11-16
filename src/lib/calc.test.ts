@@ -147,10 +147,10 @@ describe('spareavtaler', () => {
 });
 
 describe('endring av aksjeandel', () => {
-  it('er bare mulig hos Nordea Liv', async () => {
+  it('er bare mulig hos Fjelltopp Liv', async () => {
     const { canChangeStockShare } = await import('./calc');
-    expect(canChangeStockShare({ provider: 'Nordea Liv', kind: 'EPK' })).toBe(true);
-    expect(canChangeStockShare({ provider: 'DNB Livsforsikring', kind: 'PKB' })).toBe(false);
-    expect(canChangeStockShare({ provider: 'Storebrand', kind: 'EPK' })).toBe(false);
+    expect(canChangeStockShare({ provider: 'Fjelltopp Liv', kind: 'EPK' })).toBe(true);
+    expect(canChangeStockShare({ provider: 'Kystlys Livsforsikring', kind: 'PKB' })).toBe(false);
+    expect(canChangeStockShare({ provider: 'Havbris Pensjon', kind: 'EPK' })).toBe(false);
   });
 });

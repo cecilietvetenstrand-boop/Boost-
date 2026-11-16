@@ -394,7 +394,7 @@ const ARTICLES: Article[] = [
           items={[
             <><strong>Innskuddspensjon</strong> – vanligst i privat sektor. Utbetales minst 10 år og til minst 80 år.</>,
             <><strong>Ytelsespensjon</strong> – arbeidsgiver lover en pensjon av en viss størrelse. Mindre vanlig i dag.</>,
-            <><strong>Offentlig tjenestepensjon</strong> (KLP, Statens pensjonskasse m.fl.) – livsvarig påslag for deg født 1963 eller senere.</>,
+            <><strong>Offentlig tjenestepensjon</strong> (kommunale og statlige pensjonskasser) – livsvarig påslag for deg født 1963 eller senere.</>,
             <><strong>Bytter du jobb</strong>, blir pensjonen med deg. Gamle fripoliser og pensjonskapitalbevis kan ofte flyttes for lavere kostnader.</>,
           ]}
         />

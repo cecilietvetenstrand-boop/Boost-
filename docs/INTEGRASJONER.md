@@ -13,7 +13,7 @@ nettleseren) og følgende avtaler:
 |---|---|---|
 | **Norsk Pensjon** | Samlet oversikt over privat og offentlig tjenestepensjon, IPS, fripoliser | Samarbeidsavtale med Norsk Pensjon AS. Innlogging med BankID/ID-porten. |
 | **NAV** | Pensjonsbeholdning, opptjening, beregning av alderspensjon | Tilgang til NAVs pensjons-API-er via Maskinporten/ID-porten og avtale med NAV. Brukersamtykke. |
-| **Pensjonsleverandører** (Storebrand, DNB, Gjensidige, SpareBank 1, Nordea Liv, KLP, SPK …) | EPK, EPK-S, fripoliser, endring av investeringsprofil, opprettelse av spareavtaler | Bilaterale avtaler/API-tilgang med hver leverandør. Endring av aksjeandel og avtaler krever signering med BankID hos leverandøren. |
+| **Pensjonsleverandører** (private selskaper og offentlige pensjonskasser) | EPK, EPK-S, fripoliser, endring av investeringsprofil, opprettelse av spareavtaler | Bilaterale avtaler/API-tilgang med hver leverandør. Endring av aksjeandel og avtaler krever signering med BankID hos leverandøren. |
 | **Banker** | Kontoer og saldo (sparekonto, BSU) | PSD2 kontoinformasjon (AIS) – egen lisens fra Finanstilsynet, eller via en lisensiert aggregator. |
 | **Fond/ASK/spareavtaler** | Fondsbeholdning, opprettelse av spareavtaler | Ikke dekket av PSD2 – krever avtale med bank/fondsplattform (eller distributøravtale). |
 

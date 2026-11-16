@@ -119,7 +119,7 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
             onChange={(v) => set({ tjenestepensjon: v })}
             options={[
               { value: 'innskudd', label: 'Innskuddspensjon (privat sektor)' },
-              { value: 'offentlig', label: 'Offentlig tjenestepensjon (KLP, SPK m.fl.)' },
+              { value: 'offentlig', label: 'Offentlig tjenestepensjon (kommunal eller statlig pensjonskasse)' },
               { value: 'ingen', label: 'Har ikke tjenestepensjon' },
             ]}
           />
@@ -267,7 +267,7 @@ function AddPensionAccount() {
           { value: 'Offentlig TP', label: 'Offentlig tjenestepensjon' },
         ]}
       />
-      <TextField label="Leverandør" value={provider} onChange={setProvider} placeholder="F.eks. Nordea Liv" />
+      <TextField label="Leverandør" value={provider} onChange={setProvider} placeholder="F.eks. Fjelltopp Liv" />
       <NumberField label="Saldo / beholdning" value={balance} onChange={setBalance} suffix="kr" step={1000} />
       <label className="toggle">
         <input type="checkbox" checked={active} onChange={(e) => setActive(e.target.checked)} />
