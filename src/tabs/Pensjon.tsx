@@ -21,7 +21,8 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
     afp: 'Avtalefestet pensjon · livsvarig',
     offentligTp: 'Offentlig arbeidsgiver · livsvarig',
     epk: `Arbeidsgiver · ${s.payoutYears} år`,
-    savings: `Valgt sparing · ${s.payoutYears} år`,
+    ips: `Egen pensjonssparing · ${s.payoutYears} år`,
+    savings: `ASK, fond, VPS og bank · brukes jevnt til 90 år`,
   };
 
   const growthSeries = s.pensionAccounts.map((a, i) => ({
@@ -407,7 +408,7 @@ function PensionAccountCard({ account: a, go }: { account: PensionAccount; go: (
           <button className="btn btn-small" onClick={() => go('spar')}>Endre aksjeandel</button>
         )}
         <button className="btn btn-ghost btn-small" onClick={() => setOpen(!open)}>{open ? 'Ferdig' : 'Endre kostnader'}</button>
-        {a.source === 'manuell' && (
+        {(a.source === 'manuell' || a.source === 'eksempel') && (
           <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: 'removePension', id: a.id })}>Slett</button>
         )}
       </div>

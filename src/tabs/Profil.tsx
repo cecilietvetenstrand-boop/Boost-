@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useStore } from '../state/store';
 import { Callout, Card, NumberField, Slider, TextField } from '../components/ui';
 import { G, MAX_WITHDRAWAL_AGE, MIN_WITHDRAWAL_AGE } from '../lib/constants';
@@ -6,12 +7,14 @@ import { kr } from '../lib/format';
 export function Profil() {
   const { state, summary: s, dispatch } = useStore();
   const p = state.profile;
+  const [confirmReset, setConfirmReset] = useState(false);
   const set = (patch: Partial<typeof p>) => dispatch({ type: 'profile', patch });
   return (
     <div className="stack">
       <Card title="Om deg" subtitle="Grunnlaget for beregningen">
         <div className="grid2">
           <TextField label="Navn" value={p.name} onChange={(v) => set({ name: v })} placeholder="Valgfritt" />
+          <TextField label="Arbeidsgiver" value={p.employer ?? ''} onChange={(v) => set({ employer: v })} placeholder="Valgfritt" />
           <NumberField label="Fødselsår" value={p.birthYear} min={1950} max={2010} onChange={(v) => set({ birthYear: v })} />
           <NumberField label="Årslønn før skatt" value={p.salary} suffix="kr" step={10000} onChange={(v) => set({ salary: v })} help={`${kr(p.salary / 12)} per måned`} />
           <NumberField
@@ -48,14 +51,20 @@ export function Profil() {
 
       <Card title="Personvern og data">
         <p>Dataene dine lagres bare på denne enheten. Ingenting sendes videre uten ditt samtykke.</p>
-        <button
-          className="btn btn-ghost"
-          onClick={() => {
-            if (confirm('Slette alle data og starte på nytt?')) dispatch({ type: 'reset' });
-          }}
-        >
-          Slett alle data
-        </button>
+        {confirmReset ? (
+          <div className="row">
+            <span>Slette alle tall og kontoer?</span>
+            <button className="btn btn-primary btn-small" onClick={() => { dispatch({ type: 'reset' }); setConfirmReset(false); }}>
+              Ja, slett
+            </button>
+            <button className="btn btn-ghost btn-small" onClick={() => setConfirmReset(false)}>Avbryt</button>
+          </div>
+        ) : (
+          <div className="row">
+            <button className="btn btn-ghost" onClick={() => setConfirmReset(true)}>Slett alle data</button>
+            <button className="btn btn-ghost" onClick={() => dispatch({ type: 'loadExample' })}>Vis eksempel</button>
+          </div>
+        )}
       </Card>
     </div>
   );

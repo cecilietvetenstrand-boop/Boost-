@@ -9,7 +9,8 @@ import type { TabId } from '../lib/nudges';
 const TYPES: { value: SavingsType; label: string }[] = [
   { value: 'IPS', label: 'IPS – individuell pensjonssparing' },
   { value: 'ASK', label: 'Aksjesparekonto (ASK)' },
-  { value: 'Fond', label: 'Fond' },
+  { value: 'Fond', label: 'Fondskonto' },
+  { value: 'VPS', label: 'VPS-konto (aksjer)' },
   { value: 'Aksjer', label: 'Aksjer' },
   { value: 'Sparekonto', label: 'Sparekonto' },
   { value: 'BSU', label: 'BSU' },
@@ -22,7 +23,7 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
   const all = state.savings;
   const included = all.filter((x) => x.includeInPension);
   const totalBalance = all.reduce((a, x) => a + x.balance, 0);
-  const includedPayout = s.bySource.find((x) => x.key === 'savings')?.yearly ?? 0;
+  const includedPayout = s.bySource.filter((x) => x.key === 'savings' || x.key === 'ips').reduce((a, x) => a + x.yearly, 0);
   const update = (acc: SavingsAccount) => dispatch({ type: 'upsertSavings', account: acc });
 
   return (
@@ -31,7 +32,7 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
         <div className="stats">
           <Stat label="Samlet saldo" value={kr(totalBalance)} />
           <Stat label="Med i pensjonsberegningen" value={`${included.length} av ${all.length}`} />
-          <Stat label="Gir i pensjon" value={`${kr(includedPayout / 12)}/mnd`} hint={`Til ${p.withdrawalAge + s.payoutYears} år`} />
+          <Stat label="Gir i pensjon" value={`${kr(includedPayout / 12)}/mnd`} hint="IPS til 80 år, frie midler til 90 år" />
         </div>
         <Callout>
           Sparing som ikke er bundet (ASK, fond, sparekonto) kan brukes til andre ting – bolig, bil eller buffer. Ta den bare med i
@@ -63,7 +64,7 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
                 </div>
                 <div className="row">
                   {acc.agreement && <Badge tone="info">Spareavtale {acc.agreement.status}</Badge>}
-                  {acc.source !== 'manuell' && acc.source !== 'app' && <Badge>Koblet</Badge>}
+                  {acc.source === 'eksempel' ? <Badge>Eksempel</Badge> : acc.source !== 'manuell' && acc.source !== 'app' && <Badge>Koblet</Badge>}
                 </div>
               </div>
               <div className="grid3">
@@ -100,7 +101,7 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
                     {acc.agreement.status === 'aktiv' ? 'Sett avtalen på pause' : 'Gjenoppta avtalen'}
                   </button>
                 )}
-                {(acc.source === 'manuell' || acc.source === 'app') && (
+                {(acc.source === 'manuell' || acc.source === 'app' || acc.source === 'eksempel') && (
                   <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: 'removeSavings', id: acc.id })}>Slett</button>
                 )}
               </div>

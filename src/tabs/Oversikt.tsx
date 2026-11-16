@@ -110,7 +110,7 @@ export function Oversikt({ go }: { go: (t: TabId) => void }) {
                 <td>{x.label}</td>
                 <td className="num">{kr(x.yearly / 12)}</td>
                 <td className="num">{kr(x.yearly)}</td>
-                <td>{x.lifelong ? 'Livsvarig' : `Til ${p.withdrawalAge + s.payoutYears} år`}</td>
+                <td>{x.lifelong ? 'Livsvarig' : `Til ${x.untilAge} år`}</td>
               </tr>
             ))}
             <tr className="total">

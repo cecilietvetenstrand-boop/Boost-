@@ -6,6 +6,8 @@ export type InvestmentProfile = 'livsfase' | 'fast';
 
 export interface Profile {
   name: string;
+  /** Arbeidsgiver (valgfritt) */
+  employer?: string;
   birthYear: number;
   /** Brutto årslønn i dag */
   salary: number;
@@ -53,7 +55,7 @@ export interface PensionAccount {
   source: string; // 'manuell' eller id til kobling
 }
 
-export type SavingsType = 'IPS' | 'ASK' | 'Fond' | 'Aksjer' | 'Sparekonto' | 'BSU' | 'Annet';
+export type SavingsType = 'IPS' | 'ASK' | 'Fond' | 'VPS' | 'Aksjer' | 'Sparekonto' | 'BSU' | 'Annet';
 
 export interface SavingsAccount {
   id: string;
@@ -87,4 +89,6 @@ export interface AppState {
   pensionAccounts: PensionAccount[];
   savings: SavingsAccount[];
   connections: Connection[];
+  /** Satt når appen viser eksempeldata */
+  isExample?: boolean;
 }

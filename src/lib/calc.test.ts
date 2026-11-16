@@ -103,3 +103,19 @@ describe('kostnader EPK og EPK-S', () => {
     expect(pricey.totalYearly).toBeLessThan(epk.totalYearly);
   });
 });
+
+describe('eksempeldata', () => {
+  it('gir en rimelig pensjon og skiller IPS fra frie midler', async () => {
+    const { exampleState } = await import('../state/example');
+    const s = calcSummary(exampleState);
+    expect(s.replacementRate).toBeGreaterThan(0.5);
+    expect(s.replacementRate).toBeLessThan(1);
+    const keys = s.bySource.map((x) => x.key);
+    expect(keys).toContain('ips');
+    expect(keys).not.toContain('savings');
+    // Frie midler slås på manuelt og brukes til 90 år
+    const all = calcSummary({ ...exampleState, savings: exampleState.savings.map((x) => ({ ...x, includeInPension: true })) });
+    expect(all.bySource.find((x) => x.key === 'savings')!.untilAge).toBe(90);
+    expect(all.totalYearly).toBeGreaterThan(s.totalYearly);
+  });
+});

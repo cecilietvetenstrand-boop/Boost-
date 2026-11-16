@@ -22,7 +22,7 @@ const TABS: { id: TabId; label: string; icon: typeof BookOpen }[] = [
 ];
 
 function Shell() {
-  const { state, summary } = useStore();
+  const { state, summary, dispatch } = useStore();
   const initial = (location.hash.slice(1) as TabId) || 'oversikt';
   const [tab, setTab] = useState<TabId>(TABS.some((t) => t.id === initial) ? initial : 'oversikt');
   const go = (t: TabId) => {
@@ -63,6 +63,20 @@ function Shell() {
         ))}
       </nav>
       <main className="content">
+        {state.isExample && (
+          <div className="example-banner" role="note">
+            <div>
+              <strong>Du ser et eksempel.</strong> Ingrid er 42 år, tjener {kr(state.profile.salary)} og har pensjon fra NAV og
+              arbeidsgiver, IPS, aksjesparekonto, fond, VPS og sparekonto. Slå på frie midler under «Sparing» for å ta dem med. Tallene er oppdiktede.
+            </div>
+            <div className="row">
+              <button className="btn btn-primary btn-small" onClick={() => { dispatch({ type: 'reset' }); go('profil'); }}>
+                Start med egne tall
+              </button>
+              <button className="btn btn-ghost btn-small" onClick={() => go('koblinger')}>Koble til</button>
+            </div>
+          </div>
+        )}
         {tab === 'oversikt' && <Oversikt go={go} />}
         {tab === 'pensjon' && <Pensjon go={go} />}
         {tab === 'sparing' && <AnnenSparing go={go} />}

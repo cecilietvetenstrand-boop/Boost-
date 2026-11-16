@@ -38,6 +38,8 @@ export const MAX_WITHDRAWAL_AGE = 75;
 /** Innskuddspensjon og IPS utbetales minst i 10 år og minst til fylte 80 år */
 export const MIN_PAYOUT_YEARS = 10;
 export const MIN_PAYOUT_END_AGE = 80;
+/** Frie midler (ASK, fond, VPS, bank) brukes jevnt frem til denne alderen */
+export const FREE_SAVINGS_END_AGE = 90;
 
 /** Forventet reell avkastning (etter inflasjon, før kostnader) */
 export const REAL_RETURN_STOCKS = 0.04;

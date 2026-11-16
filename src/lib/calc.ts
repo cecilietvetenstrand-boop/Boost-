@@ -277,6 +277,11 @@ export function calcOffentligTp(p: Profile, accounts: PensionAccount[]): Offentl
 // Annen sparing
 // ---------------------------------------------------------------------------
 
+/** IPS følger reglene for pensjonssparing; frie midler brukes jevnt frem til 90 år */
+export function savingsPayoutYears(type: string, withdrawalAge: number) {
+  return type === 'IPS' ? payoutYears(withdrawalAge) : Math.max(1, C.FREE_SAVINGS_END_AGE - withdrawalAge);
+}
+
 export function projectSavings(p: Profile, s: SavingsAccount): AccountProjection {
   const age = ageOf(p);
   const monthly = s.agreement?.status === 'pause' ? 0 : s.monthly;
@@ -296,7 +301,7 @@ export function projectSavings(p: Profile, s: SavingsAccount): AccountProjection
     balanceNow: s.balance,
     balanceAtWithdrawal: proj.final,
     yearlyContribution: monthly * 12,
-    yearlyPayout: annuity(proj.final, payoutYears(p.withdrawalAge), p.payoutReturn / 100),
+    yearlyPayout: annuity(proj.final, savingsPayoutYears(s.type, p.withdrawalAge), p.payoutReturn / 100),
     path: proj.path,
   };
 }
@@ -315,7 +320,7 @@ export interface PensionSummary {
   pensionAccounts: AccountProjection[];
   savings: AccountProjection[];
   /** Summer per kilde (årlig, fra uttaksalder) */
-  bySource: { key: string; label: string; yearly: number; lifelong: boolean }[];
+  bySource: { key: string; label: string; yearly: number; lifelong: boolean; untilAge?: number }[];
   /** Total årlig pensjon i perioden fra uttak til innskuddspensjonen er ferdig utbetalt */
   totalYearly: number;
   /** Livsvarig del (etter at tidsbegrensede utbetalinger er ferdige) */
@@ -410,8 +415,16 @@ export function calcSummary(state: AppState): PensionSummary {
       label: 'Tjenestepensjon (EPK/EPK-S, fripoliser, PKB)',
       yearly: sum(pensionAccounts, () => true),
       lifelong: false,
+      untilAge: p.withdrawalAge + payoutYears(p.withdrawalAge),
     },
-    { key: 'savings', label: 'Annen sparing', yearly: sum(savings, () => true), lifelong: false },
+    { key: 'ips', label: 'IPS', yearly: sum(savings, (x) => x.kind === 'IPS'), lifelong: false, untilAge: p.withdrawalAge + payoutYears(p.withdrawalAge) },
+    {
+      key: 'savings',
+      label: 'Frie midler (ASK, fond, bank)',
+      yearly: sum(savings, (x) => x.kind !== 'IPS'),
+      lifelong: false,
+      untilAge: Math.max(p.withdrawalAge + 1, C.FREE_SAVINGS_END_AGE),
+    },
   ].filter((s) => s.yearly > 0.5);
 
   const totalYearly = bySource.reduce((s, x) => s + x.yearly, 0);

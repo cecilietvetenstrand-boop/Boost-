@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useMemo, useReducer, type ReactNo
 import type { AppState, PensionAccount, Profile, SavingsAccount } from '../lib/types';
 import type { ImportResult } from '../integrations/connectors';
 import { calcSummary, type PensionSummary } from '../lib/calc';
+import { exampleState } from './example';
 
 const STORAGE_KEY = 'boost-pensjon-v1';
 
@@ -33,13 +34,16 @@ type Action =
   | { type: 'removeSavings'; id: string }
   | { type: 'import'; connectorId: string; result: ImportResult }
   | { type: 'disconnect'; connectorId: string }
-  | { type: 'reset' };
+  | { type: 'reset' }
+  | { type: 'loadExample' };
 
 const sameAccount = (a: PensionAccount, b: PensionAccount) =>
   a.id === b.id || (a.provider === b.provider && a.kind === b.kind && a.active === b.active);
 // Merk: EPK og EPK-S hos samme leverandør regnes som ulike kontoer.
 
 function reducer(state: AppState, action: Action): AppState {
+  // Kobler du til en ekte kilde mens eksempelet vises, starter vi med blanke ark i stedet for å blande data
+  if (action.type === 'import' && state.isExample) state = defaultState;
   switch (action.type) {
     case 'profile':
       return { ...state, profile: { ...state.profile, ...action.patch } };
@@ -114,17 +118,19 @@ function reducer(state: AppState, action: Action): AppState {
       };
     case 'reset':
       return defaultState;
+    case 'loadExample':
+      return exampleState;
   }
 }
 
 function load(): AppState {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultState;
+    if (!raw) return exampleState;
     const parsed = JSON.parse(raw) as AppState;
     return { ...defaultState, ...parsed, profile: { ...defaultState.profile, ...parsed.profile } };
   } catch {
-    return defaultState;
+    return exampleState;
   }
 }
 
