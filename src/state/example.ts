@@ -65,10 +65,10 @@ export const exampleState: AppState = {
     },
     {
       id: 'eks-fond',
-      name: 'Fondskonto – Globalt indeksfond',
+      name: 'Fondskonto – Nordea Global Indeks Select',
       type: 'Fond',
-      fund: 'Globalt indeksfond',
-      provider: 'DNB',
+      fund: 'Nordea Global Indeks Select',
+      provider: 'Nordea',
       balance: 72_000,
       monthly: 1_000,
       stockShare: 100,

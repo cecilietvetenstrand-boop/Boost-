@@ -7,21 +7,13 @@ import { AgreementControls } from '../components/AgreementControls';
 import { LIFECYCLE_END_AGE, LIFECYCLE_END_SHARE, LIFECYCLE_START_AGE, LIFECYCLE_START_SHARE } from '../lib/constants';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from '../lib/constants';
+import { FUNDS, FUND_CATEGORIES, FUNDS_SOURCE } from '../lib/funds';
 import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/types';
 
 const PRODUCTS: { value: SavingsType; label: string; info: string }[] = [
   { value: 'Fond', label: 'Fondskonto', info: 'Spar fast i ett eller flere fond. Du kan ta ut pengene når du vil.' },
   { value: 'IPS', label: 'IPS', info: `Pensjonssparing med 22 % skattefradrag. Maks ${kr(IPS_MAX_YEARLY)} i året, bundet til 62 år.` },
   { value: 'ASK', label: 'Aksjesparekonto', info: 'Fond og aksjer uten skatt underveis. Skatt først når gevinsten tas ut.' },
-];
-
-/** Eksempelfond (generiske navn) med aksjeandel og årlig kostnad */
-const FUNDS = [
-  { name: 'Globalt indeksfond', stockShare: 100, fee: 0.2, info: 'Tusenvis av selskaper over hele verden' },
-  { name: 'Bærekraftig globalt aksjefond', stockShare: 100, fee: 0.6, info: 'Globale aksjer med bærekraftskriterier' },
-  { name: 'Norsk aksjefond', stockShare: 100, fee: 0.8, info: 'Selskaper på Oslo Børs' },
-  { name: 'Kombinasjonsfond 50/50', stockShare: 50, fee: 0.5, info: 'Halvparten aksjer, halvparten renter' },
-  { name: 'Rentefond', stockShare: 0, fee: 0.2, info: 'Lav risiko, lavere forventet avkastning' },
 ];
 
 export function Spar() {
@@ -82,13 +74,13 @@ function NyttSparing() {
 
   const [product, setProduct] = useState<SavingsType>('Fond');
   const [fundName, setFundName] = useState(FUNDS[0].name);
-  const [providerId, setProviderId] = useState(banks[0]?.id ?? '');
+  const [providerId, setProviderId] = useState('bank-nordea');
   const [monthly, setMonthly] = useState(needed > 0 ? Math.min(needed, 1250) : 1000);
   const [ipsShare, setIpsShare] = useState(s.yearsToWithdrawal > 10 ? 100 : 50);
   const fund = FUNDS.find((f) => f.name === fundName) ?? FUNDS[0];
   const usesFund = product !== 'IPS';
   const stockShare = usesFund ? fund.stockShare : ipsShare;
-  const fee = usesFund ? fund.fee : 0.3;
+  const fee = usesFund ? fund.assumedFee : 0.3;
   const [day, setDay] = useState(25);
   const [include, setInclude] = useState(true);
   const [busy, setBusy] = useState(false);
@@ -157,7 +149,7 @@ function NyttSparing() {
       <span className="field-label">Hva vil du spare i?</span>
       <div className="product-cards" role="radiogroup" aria-label="Spareprodukt">
         {PRODUCTS.map((x) => (
-          <button key={x.value} role="radio" aria-checked={product === x.value} className={`product-card ${product === x.value ? 'on' : ''}`} onClick={() => setProduct(x.value)}>
+          <button key={x.value} role="radio" aria-checked={product === x.value} className={`product-card ${product === x.value ? 'on' : ''}`} onClick={() => { setProduct(x.value); setProviderId(x.value === 'IPS' ? 'nordea-liv' : 'bank-nordea'); }}>
             <strong>{x.label}</strong>
             <span className="muted">{x.info}</span>
           </button>
@@ -167,17 +159,27 @@ function NyttSparing() {
         <>
           <span className="field-label">Velg fond</span>
           <div className="fund-list" role="radiogroup" aria-label="Fond">
-            {FUNDS.map((f) => (
-              <button key={f.name} role="radio" aria-checked={fundName === f.name} className={`fund ${fundName === f.name ? 'on' : ''}`} onClick={() => setFundName(f.name)}>
-                <span>
-                  <strong>{f.name}</strong>
-                  <br />
-                  <span className="muted">{f.info}</span>
-                </span>
-                <span className="muted">{f.stockShare} % aksjer · {f.fee.toLocaleString('nb-NO')} % kostnad</span>
-              </button>
+            {FUND_CATEGORIES.map((cat) => (
+              <div key={cat} className="fund-group">
+                <span className="fund-cat">{cat}</span>
+                {FUNDS.filter((f) => f.category === cat).map((f) => (
+                  <button key={f.name} role="radio" aria-checked={fundName === f.name} className={`fund ${fundName === f.name ? 'on' : ''}`} onClick={() => setFundName(f.name)}>
+                    <span>
+                      <strong>{f.name}</strong>
+                      <br />
+                      <span className="muted">{f.info}</span>
+                    </span>
+                    <span className="muted">{f.stockShare} % aksjer</span>
+                  </button>
+                ))}
+              </div>
             ))}
           </div>
+          <p className="fineprint">
+            Fondene er hentet fra <a href={FUNDS_SOURCE.url} target="_blank" rel="noreferrer">{FUNDS_SOURCE.label}</a> {FUNDS_SOURCE.date}. Se fondets
+            faktiske kostnad og risiko i Nordeas fondsliste før du velger. Beregningen bruker et anslag på {fund.assumedFee.toLocaleString('nb-NO')} % i
+            årlig kostnad for dette fondet.
+          </p>
         </>
       )}
       <div className="grid2">
