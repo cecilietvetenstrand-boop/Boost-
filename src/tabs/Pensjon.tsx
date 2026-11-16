@@ -3,8 +3,8 @@ import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, TextField } from '../components/ui';
 import { GrowthChart, SOURCE_COLOR, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, feeSplit, isEpk, selfContributionTaxBenefit, maxSelfRate, summaryByWithdrawalAge } from '../lib/calc';
-import { G, MAX_WITHDRAWAL_AGE, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
+import { calcSummary, feeSplit, isEpk, summaryByWithdrawalAge } from '../lib/calc';
+import { G, IPS_MAX_YEARLY, MAX_WITHDRAWAL_AGE, TAX_RATE_ORDINARY_INCOME, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
 import type { PensionAccount, PensionKind } from '../lib/types';
 import type { TabId } from '../lib/nudges';
 
@@ -13,8 +13,6 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
   const p = state.profile;
   const set = (patch: Partial<typeof p>) => dispatch({ type: 'profile', patch });
   const ft = s.folketrygd;
-  const maxRate = maxSelfRate(p);
-  const withMaxEpks = calcSummary({ ...state, profile: { ...p, epkSelfRate: maxRate } });
 
   const byAge = useMemo(() => summaryByWithdrawalAge(state), [state]);
   const birthYear = p.birthYear;
@@ -23,7 +21,6 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
     afp: 'Avtalefestet pensjon · livsvarig',
     offentligTp: 'Offentlig arbeidsgiver · livsvarig',
     epk: `Arbeidsgiver · ${s.payoutYears} år`,
-    egen: `Eget innskudd · ${s.payoutYears} år`,
     savings: `Valgt sparing · ${s.payoutYears} år`,
   };
 
@@ -174,38 +171,7 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
         )}
       </Card>
 
-      {p.tjenestepensjon === 'innskudd' && (
-        <Card title="Eget innskudd i pensjonskontoen" subtitle="Spar selv i EPK/EPK-S via lønna og få 22 % skattefradrag">
-          <Slider
-            label="Egen sparesats"
-            value={Math.min(p.epkSelfRate, maxRate)}
-            min={0}
-            max={maxRate}
-            step={0.5}
-            onChange={(v) => set({ epkSelfRate: v })}
-            format={(v) => `${v.toLocaleString('nb-NO')} %`}
-          />
-          <div className="stats">
-            <Stat label="Du sparer" value={`${kr(s.selfContribution / 12)}/mnd`} />
-            <Stat label="Skattefradrag" value={`${kr(selfContributionTaxBenefit(p))}/år`} tone="good" />
-            <Stat label="Netto kostnad" value={`${kr((s.selfContribution - selfContributionTaxBenefit(p)) / 12)}/mnd`} />
-            <Stat
-              label="Mer pensjon"
-              value={`${kr((s.bySource.find((x) => x.key === 'egen')?.yearly ?? 0) / 12)}/mnd`}
-              hint={`Til ${p.withdrawalAge + s.payoutYears} år`}
-            />
-          </div>
-          {p.epkSelfRate < maxRate && (
-            <Callout tone="good">
-              Sparer du maks ({maxRate} %), får du ca. {kr((withMaxEpks.totalYearly - s.totalYearly) / 12)} mer i pensjon per måned.
-            </Callout>
-          )}
-          <p className="fineprint">
-            Du kan spare inntil 5 % av lønnen (opp til 12 G), men ikke mer enn arbeidsgiveren sparer for deg ({p.employerRate} %). Pengene
-            trekkes fra lønnen og er bundet til uttak av pensjon. Endringen må registreres hos arbeidsgiver/leverandør.
-          </p>
-        </Card>
-      )}
+      <IpsCard go={go} />
 
       <Card title="AFP – avtalefestet pensjon" subtitle="Livsvarig tillegg hvis arbeidsgiveren har AFP-avtale">
         <Select
@@ -446,5 +412,35 @@ function PensionAccountCard({ account: a, go }: { account: PensionAccount; go: (
         )}
       </div>
     </article>
+  );
+}
+
+/** IPS – den eneste måten å spare til pensjon selv med skattefordel */
+function IpsCard({ go }: { go: (t: TabId) => void }) {
+  const { state, summary: s } = useStore();
+  const ips = state.savings.filter((x) => x.type === 'IPS');
+  const yearly = ips.reduce((a, x) => a + (x.agreement?.status === 'pause' ? 0 : x.monthly) * 12, 0);
+  const balance = ips.reduce((a, x) => a + x.balance, 0);
+  const fromIps = s.savings.filter((x) => x.kind === 'IPS').reduce((a, x) => a + x.yearlyPayout, 0);
+  const room = Math.max(0, IPS_MAX_YEARLY - yearly);
+  return (
+    <Card title="Spar selv til pensjon med skattefordel" subtitle="IPS – individuell pensjonssparing">
+      <div className="stats">
+        <Stat label="Du sparer i IPS" value={`${kr(yearly / 12)}/mnd`} hint={`${kr(yearly)} av maks ${kr(IPS_MAX_YEARLY)} i året`} />
+        <Stat label="Skattefradrag" value={`${kr(Math.min(yearly, IPS_MAX_YEARLY) * TAX_RATE_ORDINARY_INCOME)}/år`} tone="good" />
+        <Stat label="Saldo i dag" value={kr(balance)} />
+        <Stat label="Gir i pensjon" value={`${kr(fromIps / 12)}/mnd`} hint={`Til ${state.profile.withdrawalAge + s.payoutYears} år`} />
+      </div>
+      {room > 0 && (
+        <Callout tone="good">
+          Du kan spare {kr(room / 12)} mer i måneden i IPS og få {kr(room * TAX_RATE_ORDINARY_INCOME)} mer i skattefradrag i året.{' '}
+          <button className="link" onClick={() => go('spar')}>Start IPS →</button>
+        </Callout>
+      )}
+      <p className="fineprint">
+        Inntil {kr(IPS_MAX_YEARLY)} i året med 22 % fradrag i alminnelig inntekt. Pengene er bundet til du fyller 62 år og utbetales over
+        minst 10 år og til minst 80 år. IPS tas med i pensjonsberegningen hvis bryteren under «Sparing» er på.
+      </p>
+    </Card>
   );
 }

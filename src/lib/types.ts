@@ -19,8 +19,6 @@ export interface Profile {
   employerRate: number;
   /** Tilleggssats for lønn mellom 7,1G og 12G (0–18,1) */
   employerRateAbove71G: number;
-  /** Eget innskudd i pensjonskontoen (prosent av lønn, maks 5 og maks arbeidsgivers sats) */
-  epkSelfRate: number;
   /** Pensjonsbeholdning i folketrygden hentet fra NAV (valgfri) */
   folketrygdBeholdning?: number;
   /** Arbeidsgivers avtalte pris for standardforvaltning (prosent per år). Brukes til EPK-S-kompensasjon. */

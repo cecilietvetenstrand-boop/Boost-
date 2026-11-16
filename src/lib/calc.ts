@@ -141,22 +141,6 @@ export function employerContribution(p: Profile): number {
   return (p.employerRate / 100) * capped + (p.employerRateAbove71G / 100) * above;
 }
 
-/** Maks sats for eget innskudd i innskuddspensjonen: 5 % og ikke mer enn arbeidsgivers sats */
-export function maxSelfRate(p: Profile): number {
-  if (p.tjenestepensjon !== 'innskudd') return 0;
-  return Math.min(C.EPKS_MAX_RATE, p.employerRate);
-}
-
-/** Årlig eget innskudd (egen sparing i pensjonskontoen, med skattefradrag) */
-export function selfContribution(p: Profile): number {
-  const rate = Math.min(p.epkSelfRate, maxSelfRate(p));
-  return (rate / 100) * Math.min(p.salary, C.OTP_SALARY_CAP_G * C.G);
-}
-
-export function selfContributionTaxBenefit(p: Profile): number {
-  return selfContribution(p) * C.TAX_RATE_ORDINARY_INCOME;
-}
-
 export interface GrowthPoint {
   age: number;
   [key: string]: number;
@@ -342,7 +326,6 @@ export interface PensionSummary {
   /** Ekstra sparing som trengs for å nå målet */
   target: TargetResult;
   employerContribution: number;
-  selfContribution: number;
 }
 
 export interface TargetResult {
@@ -382,7 +365,7 @@ export function calcTarget(
 export function calcSummary(state: AppState): PensionSummary {
   const p = state.profile;
   const age = ageOf(p);
-  const contribs = { emp: employerContribution(p), self: selfContribution(p) };
+  const contribs = { emp: employerContribution(p) };
 
   const folketrygd = calcFolketrygd(p);
   const afp = calcAfp(p);
@@ -412,29 +395,6 @@ export function calcSummary(state: AppState): PensionSummary {
       ),
     );
   }
-  // Eget innskudd går inn i den aktive pensjonskontoen, men vises separat så effekten blir synlig
-  if (contribs.self > 0) {
-    const host = state.pensionAccounts.find((a) => isEpk(a) && a.active);
-    const proj = projectBalance({
-      balance: 0,
-      yearlyContribution: contribs.self,
-      fromAge: age,
-      toAge: p.withdrawalAge,
-      profile: host?.profile ?? 'livsfase',
-      stockShare: host?.stockShare ?? 100,
-      fee: host ? feeSplit(p, host).currentFee : 0,
-    });
-    pensionAccounts.push({
-      id: 'eget-innskudd',
-      label: 'Eget innskudd i pensjonskontoen',
-      kind: 'Eget innskudd',
-      balanceNow: 0,
-      balanceAtWithdrawal: proj.final,
-      yearlyContribution: contribs.self,
-      yearlyPayout: annuity(proj.final, payoutYears(p.withdrawalAge), p.payoutReturn / 100),
-      path: proj.path,
-    });
-  }
 
   const savings = state.savings.filter((s) => s.includeInPension).map((s) => projectSavings(p, s));
 
@@ -448,10 +408,9 @@ export function calcSummary(state: AppState): PensionSummary {
     {
       key: 'epk',
       label: 'Tjenestepensjon (EPK/EPK-S, fripoliser, PKB)',
-      yearly: sum(pensionAccounts, (a) => a.kind !== 'Eget innskudd'),
+      yearly: sum(pensionAccounts, () => true),
       lifelong: false,
     },
-    { key: 'egen', label: 'Eget innskudd i pensjonskontoen', yearly: sum(pensionAccounts, (a) => a.kind === 'Eget innskudd'), lifelong: false },
     { key: 'savings', label: 'Annen sparing', yearly: sum(savings, () => true), lifelong: false },
   ].filter((s) => s.yearly > 0.5);
 
@@ -474,7 +433,6 @@ export function calcSummary(state: AppState): PensionSummary {
     replacementRate: p.salary > 0 ? totalYearly / p.salary : 0,
     target: calcTarget(p, totalYearly),
     employerContribution: contribs.emp,
-    selfContribution: contribs.self,
   };
 }
 

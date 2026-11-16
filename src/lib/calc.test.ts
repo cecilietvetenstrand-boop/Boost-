@@ -8,10 +8,8 @@ import {
   employerContribution,
   feeSplit,
   lifecycleShare,
-  maxSelfRate,
   monthlySavingForTarget,
   payoutYears,
-  selfContribution,
 } from './calc';
 import { G } from './constants';
 import { defaultState } from '../state/store';
@@ -23,12 +21,6 @@ describe('regler', () => {
     expect(payoutYears(67)).toBe(13);
     expect(payoutYears(62)).toBe(18);
     expect(payoutYears(72)).toBe(10);
-  });
-
-  it('eget innskudd er maks 5 % og maks arbeidsgivers sats', () => {
-    expect(maxSelfRate({ ...profile, employerRate: 7 })).toBe(5);
-    expect(maxSelfRate({ ...profile, employerRate: 3 })).toBe(3);
-    expect(selfContribution({ ...profile, employerRate: 3, epkSelfRate: 5 })).toBeCloseTo(0.03 * profile.salary);
   });
 
   it('arbeidsgiverinnskudd begrenses til 12 G', () => {

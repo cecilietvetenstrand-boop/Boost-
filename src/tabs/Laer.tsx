@@ -6,7 +6,6 @@ import {
   Briefcase,
   ChartPie,
   Gauge,
-  HandCoins,
   Landmark,
   ListChecks,
   PiggyBank,
@@ -308,26 +307,6 @@ const ARTICLES: Article[] = [
     ),
   },
   {
-    id: 'eget-innskudd',
-    icon: HandCoins,
-    tag: 'Skatt',
-    title: 'Eget innskudd i pensjonskontoen',
-    lead: 'Spar ekstra i EPK/EPK-S via lønna og få 22 % igjen på skatten.',
-    body: (
-      <>
-        <p>
-          Har arbeidsgiveren innskuddspensjon, kan du selv spare inntil <strong>5 % av lønnen</strong> (opp til 12 G) i pensjonskontoen – men
-          ikke mer enn arbeidsgiveren sparer for deg. Beløpet trekkes fra lønnen og gir fradrag i alminnelig inntekt.
-        </p>
-        <Note>
-          <strong>Eksempel:</strong> Lønn 600 000 kr, arbeidsgiver sparer 5 %. Du sparer 5 % selv = 30 000 kr i året. Du får 6 600 kr i
-          skattefradrag, så det koster deg egentlig 23 400 kr.
-        </Note>
-        <p>Pengene er bundet til uttak av pensjon. Spør arbeidsgiveren eller leverandøren hvordan du melder deg på.</p>
-      </>
-    ),
-  },
-  {
     id: 'kostnader',
     icon: Receipt,
     tag: 'Sparing',
@@ -346,7 +325,7 @@ const ARTICLES: Article[] = [
         <Dots
           items={[
             <><strong>Aksjesparekonto (ASK):</strong> Bytt fond og aksjer uten å skatte underveis. Skatt betales først når du tar ut gevinst – det du har satt inn, kan tas ut skattefritt.</>,
-            <><strong>Individuell pensjonssparing (IPS):</strong> Inntil 15 000 kr i året med 22 % skattefradrag. Låst til du fyller 62, utbetales over minst 10 år og til minst 80 år.</>,
+            <><strong>Individuell pensjonssparing (IPS):</strong> Den eneste måten å spare til pensjon selv med skattefordel. Inntil 15 000 kr i året med 22 % skattefradrag. Låst til du fyller 62, utbetales over minst 10 år og til minst 80 år.</>,
             <><strong>BSU:</strong> Er du under 34 og skal kjøpe bolig, gir BSU skattefradrag hvert år – ofte den beste risikofrie avkastningen du kan få.</>,
           ]}
         />
@@ -543,7 +522,7 @@ export function Laer({ go }: { go: (t: TabId) => void }) {
         <ol className="num-list">
           <li><span>Sett opp en fast månedlig sparing i et globalt indeksfond – selv 500 kr er en god start.</span></li>
           <li><span>Sjekk aksjeandelen og kostnadene i EPK-en din, og vurder EPK-S.</span></li>
-          <li><span>Bruk eget innskudd i pensjonskontoen eller IPS for skattefradraget.</span></li>
+          <li><span>Spar i IPS for skattefradraget – det er den eneste egne pensjonssparingen med skattefordel.</span></li>
           <li><span>Bygg en buffer på sparekonto før du tar mer risiko.</span></li>
           <li><span>Sjekk om du har AFP før du bytter jobb etter fylte 50.</span></li>
           <li><span>Se over sparingen én gang i året – ikke hver dag.</span></li>

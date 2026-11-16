@@ -16,7 +16,6 @@ export const defaultState: AppState = {
     tjenestepensjon: 'innskudd',
     employerRate: 5,
     employerRateAbove71G: 0,
-    epkSelfRate: 0,
     employerStandardFee: 0.3,
     targetPercent: 80,
     payoutReturn: 2,

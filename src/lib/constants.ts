@@ -18,8 +18,6 @@ export const OTP_MAX_RATE = 7;
 export const OTP_MAX_EXTRA_RATE = 18.1;
 export const OTP_SALARY_CAP_G = 12;
 
-/** Eget innskudd i innskuddspensjon (egen sparing med skattefradrag) */
-export const EPKS_MAX_RATE = 5;
 export const TAX_RATE_ORDINARY_INCOME = 0.22;
 
 /** IPS: maks årlig innskudd med fradrag */

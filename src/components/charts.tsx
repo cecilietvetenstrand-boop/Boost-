@@ -18,7 +18,6 @@ export const SOURCE_COLOR: Record<string, string> = {
   afp: 'var(--series-2)',
   offentligTp: 'var(--series-3)',
   epk: 'var(--series-4)',
-  egen: 'var(--series-5)',
   savings: 'var(--series-6)',
 };
 

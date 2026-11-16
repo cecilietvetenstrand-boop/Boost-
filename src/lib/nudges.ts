@@ -1,6 +1,6 @@
 // Personlige "dytt" (nudges): små, konkrete forslag basert på brukerens egne tall.
 import type { AppState } from './types';
-import { calcSummary, maxSelfRate, type PensionSummary } from './calc';
+import { calcSummary, type PensionSummary } from './calc';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from './constants';
 import { kr } from './format';
 
@@ -28,31 +28,23 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
     });
   }
 
-  const maxRate = maxSelfRate(p);
-  if (p.tjenestepensjon === 'innskudd' && p.epkSelfRate < maxRate) {
-    const extraRate = maxRate - p.epkSelfRate;
-    const yearly = (extraRate / 100) * p.salary;
-    const better = calcSummary({ ...state, profile: { ...p, epkSelfRate: maxRate } });
-    out.push({
-      id: 'eget-innskudd',
-      tone: 'good',
-      title: 'Spar selv i pensjonskontoen – med skattefradrag',
-      text: `Setter du inn ${maxRate} % selv i pensjonskontoen (ca. ${kr(yearly / 12)}/mnd), får du ${kr(
-        yearly * TAX_RATE_ORDINARY_INCOME,
-      )} i skattefradrag i året og ca. ${kr((better.totalYearly - s.totalYearly) / 12)} mer i pensjon per måned.`,
-      action: { label: 'Se eget innskudd', tab: 'pensjon' },
+  const ipsYearly = state.savings.filter((x) => x.type === 'IPS').reduce((a, x) => a + x.monthly * 12, 0);
+  if (ipsYearly < IPS_MAX_YEARLY) {
+    const extra = IPS_MAX_YEARLY - ipsYearly;
+    const better = calcSummary({
+      ...state,
+      savings: [
+        ...state.savings,
+        { id: 'ips-preview', name: 'IPS', type: 'IPS', provider: '', balance: 0, monthly: extra / 12, stockShare: 100, fee: 0.3, includeInPension: true, source: 'app' },
+      ],
     });
-  }
-
-  const ips = state.savings.filter((x) => x.type === 'IPS').reduce((a, x) => a + x.monthly * 12, 0);
-  if (ips < IPS_MAX_YEARLY && s.target.shortfallYearly > 0) {
     out.push({
       id: 'ips',
-      tone: 'info',
-      title: 'IPS gir 22 % skattefradrag',
-      text: `Du kan spare ${kr(IPS_MAX_YEARLY)} i året i IPS og få ${kr(
-        (IPS_MAX_YEARLY - ips) * TAX_RATE_ORDINARY_INCOME,
-      )} mer i skattefradrag. Pengene er bundet til du er 62.`,
+      tone: 'good',
+      title: 'Spar selv til pensjon med skattefordel: IPS',
+      text: `Sparer du ${kr(extra / 12)} mer i måneden i IPS, får du ${kr(extra * TAX_RATE_ORDINARY_INCOME)} i skattefradrag i året og ca. ${kr(
+        (better.totalYearly - s.totalYearly) / 12,
+      )} mer i pensjon per måned.`,
       action: { label: 'Start IPS', tab: 'spar' },
     });
   }

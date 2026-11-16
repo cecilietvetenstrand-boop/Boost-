@@ -145,7 +145,7 @@ function provider(id: string, name: string, kind: 'privat' | 'offentlig' = 'priv
       kind === 'offentlig'
         ? `Offentlig tjenestepensjon hos ${name}. Henter opptjening og forventet pensjon.`
         : `Tjenestepensjon fra arbeidsgiver hos ${name}. Henter EPK/EPK-S og fripoliser, og lar deg endre aksjeandel.`,
-    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Eget innskudd', 'Fripoliser', 'Investeringsprofil'],
+    provides: kind === 'offentlig' ? ['Offentlig tjenestepensjon', 'AFP-opptjening'] : ['EPK / EPK-S', 'Fripoliser', 'Investeringsprofil'],
     canChangeStockShare: kind === 'privat',
     canCreateAgreement: kind === 'privat',
     async fetch(p) {
