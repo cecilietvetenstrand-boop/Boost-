@@ -1,9 +1,9 @@
-import { useMemo, useState } from 'react';
+import { useMemo, useState, type ReactNode } from 'react';
 import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, TextField } from '../components/ui';
 import { GrowthChart, SOURCE_COLOR, WithdrawalAgeChart } from '../components/charts';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, selfContributionTaxBenefit, maxSelfRate, summaryByWithdrawalAge } from '../lib/calc';
+import { calcSummary, feeSplit, isEpk, selfContributionTaxBenefit, maxSelfRate, summaryByWithdrawalAge } from '../lib/calc';
 import { G, MAX_WITHDRAWAL_AGE, MIN_WITHDRAWAL_AGE, OTP_MAX_EXTRA_RATE, OTP_MAX_RATE, OTP_MIN_RATE } from '../lib/constants';
 import type { PensionAccount, PensionKind } from '../lib/types';
 import type { TabId } from '../lib/nudges';
@@ -147,6 +147,16 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
                 onChange={(v) => set({ employerRateAbove71G: Math.min(OTP_MAX_EXTRA_RATE, Math.max(0, v)) })}
                 help="Gjelder bare hvis lønnen er over 7,1 G"
               />
+              <NumberField
+                label="Arbeidsgivers pris for standardforvaltning"
+                suffix="%"
+                step={0.05}
+                min={0}
+                max={2}
+                value={p.employerStandardFee}
+                onChange={(v) => set({ employerStandardFee: Math.max(0, v) })}
+                help="Det arbeidsgiver betaler for forvaltningen per år. Har du EPK-S, får du dette som kompensasjon."
+              />
             </>
           )}
         </div>
@@ -221,38 +231,14 @@ export function Pensjon({ go }: { go: (t: TabId) => void }) {
           <Callout>Ingen kontoer registrert ennå. Vi beregner EPK ut fra lønn og sparesats. Koble til Norsk Pensjon for faktisk saldo.</Callout>
         )}
         <p className="muted">
-          <strong>EPK</strong> er pensjonskontoen hos leverandøren arbeidsgiveren har valgt. <strong>EPK-S</strong> (egen pensjonskonto
-          selvvalgt) er når du selv har valgt leverandør – innskuddene fra arbeidsgiver går dit, med de samme skattefordelene.
+          <strong>EPK</strong> er pensjonskontoen hos leverandøren arbeidsgiveren har valgt – arbeidsgiver betaler forvaltningen av
+          pensjonen fra nåværende jobb. <strong>EPK-S</strong> (egen pensjonskonto selvvalgt) er når du selv har valgt leverandør – du betaler
+          forvaltningen selv, men får kompensasjon tilsvarende arbeidsgivers standardpris. Samme skattefordeler.
         </p>
         <div className="accounts">
           {state.pensionAccounts.map((a) => {
-            const proj = s.pensionAccounts.find((x) => x.id === a.id);
             return (
-              <article key={a.id} className="account">
-                <div className="account-head">
-                  <div>
-                    <h3>{a.kind} · {a.provider}</h3>
-                    <p className="muted">
-                      {a.employer ?? 'Ukjent arbeidsgiver'} · {a.profile === 'livsfase' ? 'Livsfaseprofil' : `${a.stockShare} % aksjer`} ·
-                      kostnad {a.fee.toLocaleString('nb-NO')} %
-                    </p>
-                  </div>
-                  {a.active ? <Badge tone="good">Aktiv</Badge> : <Badge>Hvilende</Badge>}
-                </div>
-                <div className="stats">
-                  <Stat label="Saldo i dag" value={kr(a.balance)} />
-                  {proj && <Stat label={`Ved ${p.withdrawalAge} år`} value={kr(proj.balanceAtWithdrawal)} />}
-                  {proj && <Stat label="Utbetaling" value={`${kr(proj.yearlyPayout / 12)}/mnd`} />}
-                </div>
-                <div className="row">
-                  {a.kind !== 'Offentlig TP' && (
-                    <button className="btn btn-small" onClick={() => go('spar')}>Endre aksjeandel</button>
-                  )}
-                  {a.source === 'manuell' && (
-                    <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: 'removePension', id: a.id })}>Slett</button>
-                  )}
-                </div>
-              </article>
+              <PensionAccountCard key={a.id} account={a} go={go} />
             );
           })}
         </div>
@@ -326,5 +312,139 @@ function AddPensionAccount() {
         <button className="btn btn-ghost" onClick={() => setOpen(false)}>Avbryt</button>
       </div>
     </div>
+  );
+}
+
+/** Pensjonskonto med saldo, prognose og hvem som betaler kostnadene */
+function PensionAccountCard({ account: a, go }: { account: PensionAccount; go: (t: TabId) => void }) {
+  const { state, summary: s, dispatch } = useStore();
+  const p = state.profile;
+  const [open, setOpen] = useState(false);
+  const proj = s.pensionAccounts.find((x) => x.id === a.id);
+  const fees = feeSplit(p, a);
+  const update = (patch: Partial<PensionAccount>) => dispatch({ type: 'upsertPension', account: { ...a, ...patch } });
+  const nb = (v: number) => v.toLocaleString('nb-NO', { maximumFractionDigits: 2 });
+  const isCurrentEpk = a.active && isEpk(a);
+
+  // Sammenlign med å ha kontoen som den andre typen (EPK hos arbeidsgivers leverandør vs. EPK-S)
+  const altKind = a.kind === 'EPK' ? 'EPK-S' : 'EPK';
+  const alt = isCurrentEpk
+    ? calcSummary({ ...state, pensionAccounts: state.pensionAccounts.map((x) => (x.id === a.id ? { ...x, kind: altKind } : x)) })
+    : null;
+  const altDiff = alt ? (alt.totalYearly - s.totalYearly) / 12 : 0;
+
+  let costText: ReactNode;
+  if (isCurrentEpk && a.kind === 'EPK') {
+    costText = (
+      <>
+        Arbeidsgiver betaler forvaltning og administrasjon for pensjonen fra nåværende jobb
+        {fees.priorBalance > 0 && (
+          <>. Du betaler {nb(a.fee)} % i året for {kr(fees.priorBalance)} fra tidligere jobber (arbeidsgivers avtalte pris)</>
+        )}
+        .
+      </>
+    );
+  } else if (isCurrentEpk && a.kind === 'EPK-S') {
+    const net = fees.currentFee;
+    costText = (
+      <>
+        Du betaler {nb(a.fee)} % i året selv og får {nb(fees.compensation)} % i kompensasjon fra arbeidsgiver for pensjonen fra nåværende
+        jobb.{' '}
+        {net > 0 ? (
+          <>Du betaler mellomlegget på {nb(net)} %.</>
+        ) : net < 0 ? (
+          <>Forvaltningen er billigere – overskuddet på {nb(-net)} % blir igjen på kontoen din.</>
+        ) : (
+          <>Det går akkurat opp.</>
+        )}
+        {fees.priorBalance > 0 && <> Pensjon fra tidligere jobber ({kr(fees.priorBalance)}) betaler du full pris for.</>}
+        {fees.adminFeeKr > 0 && <> Administrasjon: {kr(fees.adminFeeKr)} i året.</>}
+      </>
+    );
+  } else if (a.kind === 'Offentlig TP') {
+    costText = <>Offentlig tjenestepensjon har ingen forvaltningskostnad for deg.</>;
+  } else {
+    costText = <>Du betaler selv {nb(a.fee)} % i året i forvaltning for denne kontoen.</>;
+  }
+
+  return (
+    <article className="account">
+      <div className="account-head">
+        <div>
+          <h3>
+            {a.kind === 'EPK-S' ? 'EPK-S (selvvalgt)' : a.kind} · {a.provider}
+          </h3>
+          <p className="muted">
+            {a.employer ?? 'Ukjent arbeidsgiver'} · {a.profile === 'livsfase' ? 'Livsfaseprofil' : `${a.stockShare} % aksjer`} · kostnad{' '}
+            {nb(a.fee)} %
+          </p>
+        </div>
+        {a.active ? <Badge tone="good">Aktiv</Badge> : <Badge>Hvilende</Badge>}
+      </div>
+      <div className="stats">
+        <Stat label="Saldo i dag" value={kr(a.balance)} />
+        {proj && <Stat label={`Ved ${p.withdrawalAge} år`} value={kr(proj.balanceAtWithdrawal)} />}
+        {proj && <Stat label="Utbetaling" value={`${kr(proj.yearlyPayout / 12)}/mnd`} />}
+      </div>
+      <p className="cost-line">
+        <strong>Hvem betaler kostnadene?</strong> {costText}
+      </p>
+      {alt && Math.abs(altDiff) >= 1 && (
+        <Callout tone={altDiff > 0 ? 'good' : 'info'}>
+          Som {altKind === 'EPK-S' ? `EPK-S med samme forvaltningspris (${nb(a.fee)} %)` : 'EPK hos arbeidsgivers leverandør'} ville du fått ca.{' '}
+          <strong>
+            {altDiff > 0 ? '+' : ''}
+            {kr(altDiff)}/mnd
+          </strong>{' '}
+          i pensjon.
+          {altKind === 'EPK-S' && altDiff < 0 && ' EPK-S lønner seg bare hvis du velger forvaltning som er billigere enn arbeidsgivers standardpris.'}
+        </Callout>
+      )}
+      {open && (
+        <div className="grid3">
+          <NumberField label="Forvaltningskostnad" suffix="%" step={0.05} min={0} value={a.fee} onChange={(v) => update({ fee: Math.max(0, v) })} />
+          {isCurrentEpk && (
+            <NumberField
+              label="Herav fra nåværende jobb"
+              suffix="kr"
+              step={10000}
+              value={a.currentJobBalance ?? a.balance}
+              onChange={(v) => update({ currentJobBalance: Math.max(0, Math.min(a.balance, v)) })}
+              help="Resten regnes som pensjon fra tidligere jobber"
+            />
+          )}
+          {a.kind === 'EPK-S' && (
+            <NumberField
+              label="Administrasjonskostnad"
+              suffix="kr/år"
+              step={50}
+              min={0}
+              value={a.adminFeeKr ?? 0}
+              onChange={(v) => update({ adminFeeKr: Math.max(0, v) })}
+            />
+          )}
+          {isCurrentEpk && (
+            <Select
+              label="Leverandør valgt av"
+              value={a.kind}
+              onChange={(v) => update({ kind: v })}
+              options={[
+                { value: 'EPK', label: 'Arbeidsgiver (EPK)' },
+                { value: 'EPK-S', label: 'Meg selv (EPK-S)' },
+              ]}
+            />
+          )}
+        </div>
+      )}
+      <div className="row">
+        {a.kind !== 'Offentlig TP' && (
+          <button className="btn btn-small" onClick={() => go('spar')}>Endre aksjeandel</button>
+        )}
+        <button className="btn btn-ghost btn-small" onClick={() => setOpen(!open)}>{open ? 'Ferdig' : 'Endre kostnader'}</button>
+        {a.source === 'manuell' && (
+          <button className="btn btn-ghost btn-small" onClick={() => dispatch({ type: 'removePension', id: a.id })}>Slett</button>
+        )}
+      </div>
+    </article>
   );
 }

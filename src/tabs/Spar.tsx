@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, Toggle } from '../components/ui';
 import { kr, pct, uid } from '../lib/format';
-import { calcSummary, expectedReturn, lifecycleShare } from '../lib/calc';
+import { calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from '../lib/constants';
 import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/types';
@@ -248,7 +248,7 @@ function StockShareEditor({ account, currentTotal }: { account: PensionAccount; 
         <p className="muted">100 % aksjer til 50 år, deretter gradvis nedtrapping til 20 % ved 75 år. Du har {Math.round(effShare)} % aksjer nå.</p>
       )}
       <p>
-        Forventet avkastning nå: <strong>{pct(expectedReturn(effShare, account.fee), 1)}</strong> per år etter kostnader og inflasjon.
+        Forventet avkastning nå: <strong>{pct(expectedReturn(effShare, feeSplit(state.profile, account).currentFee), 1)}</strong> per år etter dine kostnader og inflasjon.
         {changed && (
           <>
             {' '}Endringen gir <strong className={diff >= 0 ? 'pos' : 'neg'}>{diff >= 0 ? '+' : ''}{kr(diff)}/mnd</strong> i pensjon.

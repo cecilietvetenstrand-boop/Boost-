@@ -337,3 +337,5 @@ input, select { font: inherit; color: inherit; }
 .calc-result.first { background: var(--brand); color: var(--brand-ink); }
 .calc-result .lbl { font-size: 0.8rem; opacity: 0.8; }
 .calc-result .big { font-size: 1.25rem; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+.cost-line { font-size: 0.88rem; color: var(--text-secondary); background: var(--surface-2); border-radius: 14px; padding: 10px 14px; }

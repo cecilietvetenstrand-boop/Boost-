@@ -230,8 +230,8 @@ const ARTICLES: Article[] = [
             ['Finn leverandøren', 'Logg inn på norskpensjon.no med BankID og se hvem som forvalter pensjonen din – eller koble til i appen.'],
             ['Logg inn hos leverandøren', 'Se etter «spareprofil» eller «investeringsvalg».'],
             ['Velg aksjeandel', 'Vanlige valg er 100, 80, 50 eller 20 % aksjer, eller en livsfaseprofil som trapper ned automatisk mot pensjon.'],
-            ['Sjekk kostnadene', 'Forskjeller på bare 0,5 prosentpoeng i året betyr mye over 30 år.'],
-            ['Vurder EPK-S', 'Du kan velge en annen leverandør selv hvis du vil ha lavere kostnader eller andre fond.'],
+            ['Sjekk kostnadene', 'Arbeidsgiver betaler forvaltningen av pensjonen fra nåværende jobb. Pensjon fra tidligere jobber betaler du selv for – til samme pris som arbeidsgiver har avtalt.'],
+            ['Vurder EPK-S', 'Du kan velge leverandør selv. Da betaler du forvaltningen, men får kompensasjon fra arbeidsgiver tilsvarende standardprisen.'],
           ]}
         />
         <Note>
@@ -261,18 +261,49 @@ const ARTICLES: Article[] = [
             'Utbetalingen skattlegges som pensjon, og pengene er bundet til du tar ut pensjon.',
           ]}
         />
-        <h4>Hvorfor velge selv?</h4>
+        <h4>Hvem betaler kostnadene?</h4>
+        <table className="table">
+          <thead>
+            <tr>
+              <th />
+              <th>EPK (arbeidsgivers leverandør)</th>
+              <th>EPK-S (selvvalgt)</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Forvaltning – pensjon fra nåværende jobb</td>
+              <td>Arbeidsgiver betaler</td>
+              <td>Du betaler, men får kompensasjon tilsvarende arbeidsgivers standardpris</td>
+            </tr>
+            <tr>
+              <td>Forvaltning – pensjon fra tidligere jobber</td>
+              <td>Du betaler, til samme pris som arbeidsgiver har avtalt</td>
+              <td>Du betaler selv</td>
+            </tr>
+            <tr>
+              <td>Administrasjonskostnader</td>
+              <td>Arbeidsgiver betaler</td>
+              <td>Du betaler selv</td>
+            </tr>
+          </tbody>
+        </table>
+        <Note>
+          <strong>Slik virker kompensasjonen:</strong> Velger du forvaltning som er dyrere enn arbeidsgivers standardforvaltning, betaler du
+          forskjellen selv. Er den billigere, blir overskuddet igjen på pensjonskontoen din.
+        </Note>
+        <h4>Når kan EPK-S lønne seg?</h4>
         <Dots
           items={[
-            'Lavere forvaltningskostnader.',
-            'Et fondsutvalg og en aksjeandel som passer deg bedre.',
-            'Pensjonen samlet hos samme bank som resten av sparingen din.',
+            'Når du finner forvaltning som er billigere enn arbeidsgivers standardpris – da går overskuddet inn på kontoen din.',
+            'Når du vil ha et annet fondsutvalg eller en annen aksjeandel enn arbeidsgivers leverandør tilbyr.',
+            'Når du vil ha pensjonen samlet hos samme bank som resten av sparingen.',
           ]}
         />
-        <Note>
-          Sammenlign kostnader og investeringsvalg før du flytter, og sjekk om det er gebyrer knyttet til kontoen. Flyttingen bestilles hos
-          leverandøren du vil flytte til.
-        </Note>
+        <p>
+          Husk å regne med administrasjonskostnadene du må betale selv. Under «Pensjonen min» kan du trykke «Endre kostnader» på
+          pensjonskontoen og se hva EPK-S ville gitt deg.
+        </p>
       </>
     ),
   },

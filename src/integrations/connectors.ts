@@ -62,6 +62,8 @@ function demoEpk(p: Profile, provider: string, id: string, active: boolean): Pen
     profile: 'livsfase',
     fee: active ? 0.45 : 0.6,
     active,
+    // Aktiv konto: anta at en del av saldoen er flyttet inn fra tidligere jobber
+    currentJobBalance: active ? round(balance * 0.7) : undefined,
     source: '',
   };
 }

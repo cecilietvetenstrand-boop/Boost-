@@ -23,6 +23,8 @@ export interface Profile {
   epkSelfRate: number;
   /** Pensjonsbeholdning i folketrygden hentet fra NAV (valgfri) */
   folketrygdBeholdning?: number;
+  /** Arbeidsgivers avtalte pris for standardforvaltning (prosent per år). Brukes til EPK-S-kompensasjon. */
+  employerStandardFee: number;
   /** Mål for pensjon i prosent av dagens lønn */
   targetPercent: number;
   /** Forventet årlig reell avkastning i utbetalingsfasen */
@@ -46,6 +48,10 @@ export interface PensionAccount {
   fee: number;
   /** Om kontoen får løpende innskudd fra nåværende arbeidsgiver */
   active: boolean;
+  /** Hvor mye av saldoen som er opptjent i nåværende jobb (resten regnes som tidligere jobber). Tom = hele saldoen. */
+  currentJobBalance?: number;
+  /** Administrasjonskostnad du betaler selv, kr per år (gjelder EPK-S) */
+  adminFeeKr?: number;
   source: string; // 'manuell' eller id til kobling
 }
 

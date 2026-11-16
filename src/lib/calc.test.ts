@@ -6,6 +6,7 @@ import {
   calcSummary,
   capitalForAnnuity,
   employerContribution,
+  feeSplit,
   lifecycleShare,
   maxSelfRate,
   monthlySavingForTarget,
@@ -78,5 +79,35 @@ describe('pensjonsberegning', () => {
     const s = calcSummary({ ...defaultState, profile });
     expect(s.target.targetYearly).toBeCloseTo(0.8 * profile.salary);
     if (s.target.shortfallYearly > 0) expect(s.target.monthlyNeededIfWait5).toBeGreaterThan(s.target.monthlyNeeded);
+  });
+});
+
+describe('kostnader EPK og EPK-S', () => {
+  const base = {
+    id: 'x', provider: 'L', balance: 500_000, stockShare: 100, profile: 'fast' as const, active: true, source: 'manuell',
+  };
+  const p = { ...profile, employerStandardFee: 0.3 };
+
+  it('EPK: arbeidsgiver betaler nåværende jobb, du betaler tidligere jobber', () => {
+    const f = feeSplit(p, { ...base, kind: 'EPK', fee: 0.4, currentJobBalance: 300_000 });
+    expect(f.currentFee).toBe(0);
+    expect(f.priorBalance).toBe(200_000);
+    expect(f.priorFee).toBe(0.4);
+    expect(f.adminFeeKr).toBe(0);
+  });
+
+  it('EPK-S: du betaler, men får kompensasjon lik standardprisen', () => {
+    expect(feeSplit(p, { ...base, kind: 'EPK-S', fee: 0.5 }).currentFee).toBeCloseTo(0.2);
+    // Billigere forvaltning: overskuddet blir på kontoen (negativ netto kostnad)
+    expect(feeSplit(p, { ...base, kind: 'EPK-S', fee: 0.1 }).currentFee).toBeCloseTo(-0.2);
+  });
+
+  it('EPK-S med billig forvaltning gir mer enn EPK med samme pris som standard', () => {
+    const acc = { ...base, kind: 'EPK' as const, fee: 0.3 };
+    const epk = calcSummary({ ...defaultState, profile: p, pensionAccounts: [acc] });
+    const cheap = calcSummary({ ...defaultState, profile: p, pensionAccounts: [{ ...acc, kind: 'EPK-S', fee: 0.1 }] });
+    const pricey = calcSummary({ ...defaultState, profile: p, pensionAccounts: [{ ...acc, kind: 'EPK-S', fee: 0.8, adminFeeKr: 500 }] });
+    expect(cheap.totalYearly).toBeGreaterThan(epk.totalYearly);
+    expect(pricey.totalYearly).toBeLessThan(epk.totalYearly);
   });
 });

@@ -71,13 +71,13 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
   }
 
   const epk = state.pensionAccounts.find((a) => a.kind === 'EPK' && a.active);
-  if (epk && epk.fee >= 0.4 && !state.pensionAccounts.some((a) => a.kind === 'EPK-S')) {
+  if (epk && !state.pensionAccounts.some((a) => a.kind === 'EPK-S')) {
     out.push({
       id: 'epk-s',
       tone: 'info',
       title: 'Vurder EPK-S – velg leverandør selv',
-      text: `Pensjonskontoen din hos ${epk.provider} koster ${epk.fee.toLocaleString('nb-NO')} % i året. Med EPK-S (egen pensjonskonto selvvalgt) kan du flytte den til en leverandør du velger selv – med samme skattefordeler.`,
-      action: { label: 'Les om EPK-S', tab: 'laer' },
+      text: `Med EPK-S betaler du forvaltningen selv, men får ${p.employerStandardFee.toLocaleString('nb-NO')} % i kompensasjon fra arbeidsgiver. Velger du billigere forvaltning enn det, blir overskuddet på pensjonskontoen din.`,
+      action: { label: 'Sammenlign', tab: 'pensjon' },
     });
   }
 
@@ -87,7 +87,7 @@ export function buildNudges(state: AppState, s: PensionSummary): Nudge[] {
       id: 'fees',
       tone: 'warn',
       title: 'Samle gamle pensjoner og spar kostnader',
-      text: 'Du har pensjon fra tidligere arbeidsgivere med høyere kostnader. Vurder å flytte dem inn i egen pensjonskonto hos nåværende leverandør.',
+      text: 'Forvaltningen av pensjon fra tidligere jobber betaler du selv. Vurder å samle den i pensjonskontoen din – da får du samme pris som arbeidsgiveren din har avtalt.',
       action: { label: 'Se kontoene', tab: 'pensjon' },
     });
   }

@@ -199,27 +199,69 @@ export interface AccountProjection {
 /** EPK og EPK-S (selvvalgt leverandør) er samme type konto og får arbeidsgiverinnskudd når de er aktive */
 export const isEpk = (a: { kind: string }) => a.kind === 'EPK' || a.kind === 'EPK-S';
 
+/**
+ * Hvem betaler forvaltningen?
+ * - EPK hos arbeidsgivers leverandør: arbeidsgiver betaler forvaltningen av pensjonen fra nåværende jobb
+ *   (og administrasjonen). Du betaler for pensjon fra tidligere jobber, til samme pris som arbeidsgiver har avtalt.
+ * - EPK-S (selvvalgt leverandør): du betaler forvaltningen av hele kapitalen, men får kompensasjon fra
+ *   arbeidsgiver tilsvarende standardforvaltningen for pensjonen fra nåværende jobb. Dyrere forvaltning betaler
+ *   du selv; er den billigere, blir overskuddet på kontoen. Tidligere jobber og administrasjon betaler du selv.
+ * - Hvilende kontoer (fripoliser, PKB, EPK uten innskudd): du betaler alt selv.
+ */
+export interface FeeSplit {
+  /** Kapital fra nåværende jobb */
+  currentBalance: number;
+  /** Kapital fra tidligere jobber */
+  priorBalance: number;
+  /** Netto årlig kostnad (prosent) du bærer på kapital fra nåværende jobb. Negativ = overskudd til kontoen. */
+  currentFee: number;
+  /** Årlig kostnad (prosent) på kapital fra tidligere jobber */
+  priorFee: number;
+  /** Administrasjonskostnad du betaler selv (kr per år) */
+  adminFeeKr: number;
+  /** Kompensasjon fra arbeidsgiver (prosent), kun EPK-S */
+  compensation: number;
+}
+
+export function feeSplit(p: Profile, acc: PensionAccount): FeeSplit {
+  const fromCurrentJob = acc.active && isEpk(acc);
+  const currentBalance = fromCurrentJob ? Math.min(acc.balance, acc.currentJobBalance ?? acc.balance) : 0;
+  const priorBalance = acc.balance - currentBalance;
+  if (fromCurrentJob && acc.kind === 'EPK') {
+    // Tidligere jobber: samme pris som arbeidsgiver har avtalt
+    return { currentBalance, priorBalance, currentFee: 0, priorFee: acc.fee, adminFeeKr: 0, compensation: 0 };
+  }
+  if (fromCurrentJob && acc.kind === 'EPK-S') {
+    return {
+      currentBalance,
+      priorBalance,
+      currentFee: acc.fee - p.employerStandardFee,
+      priorFee: acc.fee,
+      adminFeeKr: acc.adminFeeKr ?? 0,
+      compensation: p.employerStandardFee,
+    };
+  }
+  return { currentBalance, priorBalance, currentFee: acc.fee, priorFee: acc.fee, adminFeeKr: acc.adminFeeKr ?? 0, compensation: 0 };
+}
+
 function projectPensionAccount(p: Profile, acc: PensionAccount, contribs: { emp: number }) {
   const age = ageOf(p);
   const contribution = acc.active && isEpk(acc) ? contribs.emp : 0;
-  const proj = projectBalance({
-    balance: acc.balance,
-    yearlyContribution: contribution,
-    fromAge: age,
-    toAge: p.withdrawalAge,
-    profile: acc.profile,
-    stockShare: acc.stockShare,
-    fee: acc.fee,
-  });
+  const fees = feeSplit(p, acc);
+  const common = { fromAge: age, toAge: p.withdrawalAge, profile: acc.profile, stockShare: acc.stockShare };
+  const current = projectBalance({ ...common, balance: fees.currentBalance, yearlyContribution: contribution - fees.adminFeeKr, fee: fees.currentFee });
+  const prior = projectBalance({ ...common, balance: fees.priorBalance, yearlyContribution: 0, fee: fees.priorFee });
+  const path = current.path.map((pt, i) => ({ age: pt.age, value: Math.max(0, pt.value + prior.path[i].value) }));
+  const final = Math.max(0, current.final + prior.final);
   return {
     id: acc.id,
     label: `${acc.kind} – ${acc.provider}`,
     kind: acc.kind,
     balanceNow: acc.balance,
-    balanceAtWithdrawal: proj.final,
+    balanceAtWithdrawal: final,
     yearlyContribution: contribution,
-    yearlyPayout: annuity(proj.final, payoutYears(p.withdrawalAge), p.payoutReturn / 100),
-    path: proj.path,
+    yearlyPayout: annuity(final, payoutYears(p.withdrawalAge), p.payoutReturn / 100),
+    path,
   } satisfies AccountProjection;
 }
 
@@ -380,7 +422,7 @@ export function calcSummary(state: AppState): PensionSummary {
       toAge: p.withdrawalAge,
       profile: host?.profile ?? 'livsfase',
       stockShare: host?.stockShare ?? 100,
-      fee: host?.fee ?? 0.3,
+      fee: host ? feeSplit(p, host).currentFee : 0,
     });
     pensionAccounts.push({
       id: 'eget-innskudd',
