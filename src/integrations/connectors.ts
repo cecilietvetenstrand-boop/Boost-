@@ -60,7 +60,7 @@ function demoEpk(p: Profile, provider: string, id: string, active: boolean): Pen
     provider,
     employer: active ? 'Nåværende arbeidsgiver' : 'Tidligere arbeidsgivere',
     balance,
-    stockShare: 100,
+    stockShare: 90,
     profile: 'livsfase',
     fee: active ? 0.45 : 0.6,
     active,
@@ -83,7 +83,7 @@ const norskPensjon: Connector = {
   async fetch(p) {
     await delay(900);
     const accounts: PensionAccount[] = [
-      { ...demoEpk(p, 'Storebrand', 'np-epk-1', true), source: this.id },
+      { ...demoEpk(p, 'Nordea Liv', 'np-epk-1', true), source: this.id },
       { ...demoEpk(p, 'DNB Livsforsikring', 'np-epk-2', false), source: this.id },
       {
         id: 'np-fripolise-1',
@@ -225,11 +225,11 @@ function bank(id: string, name: string, products: ('Sparekonto' | 'BSU' | 'Fond'
 export const CONNECTORS: Connector[] = [
   norskPensjon,
   nav,
+  provider('nordea-liv', 'Nordea Liv'),
   provider('storebrand', 'Storebrand'),
   provider('dnb-liv', 'DNB Livsforsikring'),
   provider('gjensidige-pensjon', 'Gjensidige Pensjon'),
   provider('sb1-forsikring', 'SpareBank 1 Forsikring'),
-  provider('nordea-liv', 'Nordea Liv'),
   provider('if-pensjon', 'Tryg / If Pensjon'),
   provider('klp', 'KLP', 'offentlig'),
   provider('spk', 'Statens pensjonskasse', 'offentlig'),

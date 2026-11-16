@@ -49,8 +49,9 @@ export const FREE_SAVINGS_END_AGE = 90;
 export const REAL_RETURN_STOCKS = 0.04;
 export const REAL_RETURN_BONDS = 0.005;
 
-/** Livsfaseprofil: full aksjeandel til 50 år, trappes lineært ned til 20 % ved 75 år */
-export const LIFECYCLE_START_AGE = 50;
+/** Livsfaseprofil (Nordea Liv): 90 % aksjer til 60 år, trappes lineært ned over 15 år og stopper ved 75 år */
+export const LIFECYCLE_START_AGE = 60;
 export const LIFECYCLE_END_AGE = 75;
-export const LIFECYCLE_START_SHARE = 100;
+export const LIFECYCLE_START_SHARE = 90;
+/** Aksjeandel når nedtrappingen er ferdig ved 75 år */
 export const LIFECYCLE_END_SHARE = 20;

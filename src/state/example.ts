@@ -26,11 +26,11 @@ export const exampleState: AppState = {
     {
       id: 'eks-epk',
       kind: 'EPK',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       employer: 'Nordlys Teknologi AS',
       balance: 296_000,
       currentJobBalance: 204_000,
-      stockShare: 100,
+      stockShare: 90,
       profile: 'livsfase',
       fee: 0.3,
       active: true,
@@ -92,7 +92,7 @@ export const exampleState: AppState = {
       id: 'eks-ips',
       name: 'IPS',
       type: 'IPS',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       balance: 46_000,
       monthly: 1_000,
       stockShare: 100,
@@ -115,10 +115,10 @@ export const exampleState: AppState = {
     },
   ],
   connections: [],
-  // Uføredekning i pensjonsordningen hos Storebrand (vanlig oppsett i privat sektor)
+  // Uføredekning i pensjonsordningen hos Nordea Liv (vanlig oppsett i privat sektor)
   disability: {
     enabled: true,
-    provider: 'Storebrand',
+    provider: 'Nordea Liv',
     percentOfSalary: 3,
     gSupplement: 0.25,
     percentAbove6G: 66,
@@ -130,7 +130,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-gruppeliv',
       type: 'Gruppeliv',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       source: 'arbeidsgiver',
       event: 'død',
       amount: 1_301_600,
@@ -140,7 +140,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-yrkesskade',
       type: 'Yrkesskade',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       source: 'arbeidsgiver',
       event: 'uførhet',
       note: 'Lovpålagt. Erstatning etter standardregler ved skade i jobb',
@@ -149,7 +149,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-behandling',
       type: 'Behandlingsforsikring',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       source: 'arbeidsgiver',
       event: 'behandling',
       note: 'Rask tilgang til spesialist og operasjon',
@@ -158,7 +158,7 @@ export const exampleState: AppState = {
     {
       id: 'eks-barnepensjon',
       type: 'Barnepensjon',
-      provider: 'Storebrand',
+      provider: 'Nordea Liv',
       source: 'arbeidsgiver',
       event: 'død',
       yearlyPayout: 65_000,

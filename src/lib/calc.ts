@@ -390,7 +390,7 @@ export function calcSummary(state: AppState): PensionSummary {
           kind: 'EPK',
           provider: 'nåværende arbeidsgiver (beregnet)',
           balance: 0,
-          stockShare: 100,
+          stockShare: 90,
           profile: 'livsfase',
           fee: 0.3,
           active: true,

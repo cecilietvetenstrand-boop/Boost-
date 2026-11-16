@@ -3,6 +3,7 @@ import { useStore } from '../state/store';
 import { Badge, Callout, Card, NumberField, Select, Slider, Stat, Toggle } from '../components/ui';
 import { kr, pct, uid } from '../lib/format';
 import { calcSummary, expectedReturn, feeSplit, lifecycleShare } from '../lib/calc';
+import { LIFECYCLE_END_AGE, LIFECYCLE_END_SHARE, LIFECYCLE_START_AGE, LIFECYCLE_START_SHARE } from '../lib/constants';
 import { CONNECTORS, requestSavingsAgreement, requestStockShareChange } from '../integrations/connectors';
 import { IPS_MAX_YEARLY, TAX_RATE_ORDINARY_INCOME } from '../lib/constants';
 import type { InvestmentProfile, PensionAccount, SavingsType } from '../lib/types';
@@ -245,7 +246,9 @@ function StockShareEditor({ account, currentTotal }: { account: PensionAccount; 
       {profile === 'fast' ? (
         <Slider label="Aksjeandel" value={share} min={0} max={100} step={10} onChange={setShare} format={(v) => `${v} %`} />
       ) : (
-        <p className="muted">100 % aksjer til 50 år, deretter gradvis nedtrapping til 20 % ved 75 år. Du har {Math.round(effShare)} % aksjer nå.</p>
+        <p className="muted">
+          {LIFECYCLE_START_SHARE} % aksjer til {LIFECYCLE_START_AGE} år, deretter gradvis nedtrapping over {LIFECYCLE_END_AGE - LIFECYCLE_START_AGE} år til {LIFECYCLE_END_SHARE} % ved {LIFECYCLE_END_AGE} år. Du har {Math.round(effShare)} % aksjer nå.
+        </p>
       )}
       <p>
         Forventet avkastning nå: <strong>{pct(expectedReturn(effShare, feeSplit(state.profile, account).currentFee), 1)}</strong> per år etter dine kostnader og inflasjon.

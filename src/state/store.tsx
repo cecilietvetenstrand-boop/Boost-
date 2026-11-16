@@ -161,6 +161,8 @@ function load(): AppState {
     const raw = localStorage.getItem(STORAGE_KEY);
     if (!raw) return exampleState;
     const parsed = JSON.parse(raw) as AppState;
+    // Eksempeldata hentes alltid fersk, slik at endringer i eksempelet vises for alle
+    if (parsed.isExample) return exampleState;
     return {
       ...defaultState,
       ...parsed,
