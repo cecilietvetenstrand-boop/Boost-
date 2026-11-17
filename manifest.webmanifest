@@ -1,0 +1,16 @@
+{
+  "name": "Boost – pensjon og sparing",
+  "short_name": "Boost",
+  "description": "Se pensjonen fra NAV og arbeidsgiver sammen med all egen sparing.",
+  "lang": "nb",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1546ff",
+  "theme_color": "#1546ff",
+  "icons": [
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
