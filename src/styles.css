@@ -514,3 +514,20 @@ body { overflow-x: clip; }
 .fund-group { display: grid; gap: 8px; }
 .fund-cat { font-size: 0.78rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text-muted); margin-top: 6px; }
 .provider-line { margin: 4px 0 12px; font-size: 0.9rem; color: var(--text-secondary); }
+
+/* Klimaavtrykk */
+.carbon-list { list-style: none; padding: 0; margin: 12px 0 0; display: flex; flex-direction: column; gap: 10px; }
+.carbon-list li { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr) auto; gap: 12px; align-items: center; }
+.carbon-name { display: flex; flex-direction: column; min-width: 0; }
+.carbon-name .muted { font-size: 0.8rem; }
+.carbon-track { height: 10px; background: var(--surface-2); border-radius: 5px; overflow: hidden; }
+.carbon-track span { display: block; height: 100%; background: var(--series-3); border-radius: 5px; }
+.carbon-val { font-variant-numeric: tabular-nums; font-size: 0.88rem; white-space: nowrap; text-align: right; }
+.carbon-na { grid-column: 2 / -1; font-size: 0.82rem; }
+.carbon-tip { margin: 14px 0 4px; padding: 12px 14px; border-radius: 14px; background: var(--good-soft); font-size: 0.9rem; }
+.fund-meta { text-align: right; white-space: nowrap; }
+@media (max-width: 560px) {
+  .carbon-list li { grid-template-columns: 1fr auto; }
+  .carbon-track { grid-column: 1 / -1; grid-row: 2; }
+  .carbon-na { grid-column: 1 / -1; }
+}

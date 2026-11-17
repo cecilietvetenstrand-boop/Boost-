@@ -18,6 +18,7 @@ import {
   Wallet,
   ShieldCheck,
   Umbrella,
+  Leaf,
 } from 'lucide-react';
 import { Slider } from '../components/ui';
 import { kr } from '../lib/format';
@@ -458,6 +459,31 @@ const ARTICLES: Article[] = [
           ]}
         />
         <Note>Samboere er ikke automatisk begunstiget på samme måte som ektefeller. Sjekk begunstigelsen hos forsikringsselskapet.</Note>
+      </>
+    ),
+  },
+  {
+    id: 'klima',
+    icon: Leaf,
+    tag: 'Sparing',
+    title: 'Klimaavtrykket til sparingen din',
+    lead: 'Pengene dine eier biter av selskaper – og dermed en andel av utslippene deres.',
+    body: (
+      <>
+        <p>
+          Klimaavtrykket i sparing måles ofte som <strong>finansierte utslipp</strong>: hvor mange tonn CO₂-ekvivalenter selskapene i
+          fondet slipper ut, fordelt på hver million kroner du har investert. Fond i EU og Norge rapporterer dette etter regler for
+          bærekraftsinformasjon (SFDR).
+        </p>
+        <Dots
+          items={[
+            <><strong>Fondet betyr mest.</strong> Et globalt indeksfond og et fond som utelukker de mest utslippstunge selskapene kan ha svært ulikt avtrykk.</>,
+            <><strong>Aksjeandelen spiller inn.</strong> Aksjer og selskapsobligasjoner har avtrykk. Bankinnskudd regnes normalt ikke med på samme måte.</>,
+            <><strong>Norske aksjer</strong> kan ha høyere avtrykk enn globale, fordi Oslo Børs har mye olje, gass og sjømat.</>,
+            <><strong>Avtrykk er ikke alt.</strong> Se også om selskapene har troverdige klimaplaner, og om forvalteren påvirker selskapene aktivt.</>,
+          ]}
+        />
+        <Note>Under «Sparing» ser du det samlede avtrykket ditt, og hvert fond i «Spar» viser avtrykket per million kroner. Tallene i appen er eksempelverdier.</Note>
       </>
     ),
   },

@@ -161,7 +161,11 @@ function NyttSparing() {
                       <br />
                       <span className="muted">{f.info}</span>
                     </span>
-                    <span className="muted">{f.stockShare} % aksjer</span>
+                    <span className="muted fund-meta">
+                      {f.stockShare} % aksjer
+                      <br />
+                      {f.carbon.toLocaleString('nb-NO')} t CO₂e per mill.
+                    </span>
                   </button>
                 ))}
               </div>

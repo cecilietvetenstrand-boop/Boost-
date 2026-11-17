@@ -154,3 +154,18 @@ describe('endring av aksjeandel', () => {
     expect(canChangeStockShare({ provider: 'Havbris Pensjon', kind: 'EPK' })).toBe(false);
   });
 });
+
+describe('klimaavtrykk', () => {
+  it('beregner tonn CO2e fra saldo og intensitet', async () => {
+    const { savingsCarbon, intensityForShare, carbonSummary } = await import('./carbon');
+    expect(intensityForShare(100)).toBeCloseTo(5.5);
+    expect(intensityForShare(0)).toBeCloseTo(3.5);
+    const fond = { id: 'f', name: 'F', type: 'Fond' as const, provider: 'Boost', balance: 1_000_000, monthly: 0, stockShare: 100, fee: 0.2, includeInPension: true, source: 'app', fund: 'Boost Global Bærekraft' };
+    expect(savingsCarbon(fond)!.tonnes).toBeCloseTo(2.5);
+    const bank = { ...fond, id: 'b', type: 'Sparekonto' as const, fund: undefined };
+    expect(savingsCarbon(bank)!.intensity).toBeNull();
+    const sum = carbonSummary([], [fond, bank], 40);
+    expect(sum.tonnes).toBeCloseTo(2.5);
+    expect(sum.invested).toBe(1_000_000);
+  });
+});

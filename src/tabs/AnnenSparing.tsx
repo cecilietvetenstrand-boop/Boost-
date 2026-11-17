@@ -4,6 +4,7 @@ import { Badge, Callout, Card, NumberField, Select, Stat, TextField, Toggle } fr
 import { kr, uid } from '../lib/format';
 import { projectSavings } from '../lib/calc';
 import { AgreementControls } from '../components/AgreementControls';
+import { CarbonCard } from '../components/CarbonCard';
 import type { SavingsAccount, SavingsType } from '../lib/types';
 import type { TabId } from '../lib/nudges';
 
@@ -40,6 +41,8 @@ export function AnnenSparing({ go }: { go: (t: TabId) => void }) {
           pensjonsberegningen hvis du faktisk planlegger å bruke den som pensjon.
         </Callout>
       </Card>
+
+      <CarbonCard />
 
       {all.length === 0 && (
         <Card>
